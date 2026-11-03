@@ -145,6 +145,14 @@ import Footer from '../components/Footer.astro';
         );
         return;
       }
+      if (start.status === 404 || start.status === 405) {
+        // Only the copy of the site running on your own computer has the helper.
+        show(
+          'You are on the public website. Downloading only works on your own computer. Double-click start.bat in your tiktok-saver folder.',
+          'អ្នកកំពុងនៅលើគេហទំព័រសាធារណៈ។ ការទាញយកដំណើរការតែលើកុំព្យូទ័ររបស់អ្នកផ្ទាល់ប៉ុណ្ណោះ។ ចុចពីរដងលើ start.bat ក្នុងថត tiktok-saver របស់អ្នក។',
+        );
+        return;
+      }
       if (!start.ok) {
         show(`The helper did not accept this request (code ${start.status}). Please copy the link again from TikTok.`, `កម្មវិធីជំនួយមិនទទួលសំណើនេះទេ (លេខកូដ ${start.status})។ សូមចម្លងតំណម្តងទៀតពី TikTok។`);
         return;
