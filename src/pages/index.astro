@@ -116,6 +116,17 @@ import Footer from '../components/Footer.astro';
           TikTok decides which qualities a video has. If it has no 4K, you get the best one it has.
           <span class="km" lang="km">TikTok កំណត់ថាវីដេអូមានគុណភាពអ្វីខ្លះ។ បើវាគ្មាន 4K អ្នកនឹងទទួលបានគុណភាពល្អបំផុតដែលវាមាន។</span>
         </p>
+        <label class="mt-5 flex items-start gap-3">
+          <input id="caption" type="checkbox" checked class="mt-1 size-5 accent-brand" />
+          <span>
+            <span class="font-display text-lg font-bold">Put the caption on the video</span>
+            <span class="km font-display text-base font-bold" lang="km">ដាក់ caption លើវីដេអូ</span>
+            <span class="mt-1 block text-sm text-muted">
+              The caption is written at the bottom of the picture. This takes extra time, and the picture is processed again.
+              <span class="km" lang="km">caption ត្រូវបានសរសេរនៅខាងក្រោមរូបភាព។ វាចំណាយពេលបន្ថែម ហើយរូបភាពត្រូវបានដំណើរការម្តងទៀត។</span>
+            </span>
+          </span>
+        </label>
         <div class="mt-4 flex flex-col gap-3 sm:flex-row">
           <button
             type="button"
@@ -227,7 +238,7 @@ import Footer from '../components/Footer.astro';
         start = await fetch(`${HELPER}/download`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'X-TikTok-Saver': '1' },
-          body: JSON.stringify({ link: input.value.trim(), mode, quality: document.querySelector<HTMLSelectElement>('#quality')!.value, folder }),
+          body: JSON.stringify({ link: input.value.trim(), mode, quality: document.querySelector<HTMLSelectElement>('#quality')!.value, folder, caption: document.querySelector<HTMLInputElement>('#caption')!.checked }),
         });
       } catch {
         // The browser could not reach the helper at all.
@@ -253,11 +264,14 @@ import Footer from '../components/Footer.astro';
       while (true) {
         await new Promise((resolve) => setTimeout(resolve, 1500));
         const info = await (await fetch(`${HELPER}/status/${id}`)).json();
-        if (info.status === 'running') {
+        if (info.status === 'running' && info.stage === 'captioning') {
+          show(`Writing the caption on the video… ${info.captioned} of ${info.count}`, `កំពុងសរសេរ caption លើវីដេអូ… ${info.captioned} ក្នុងចំណោម ${info.count}`);
+        } else if (info.status === 'running') {
           show(`Saved ${info.count} video(s) so far…`, `បានរក្សាទុក ${info.count} វីដេអូរហូតមកដល់ឥឡូវ…`);
         } else if (info.status === 'done') {
           const quality = info.heights?.length ? ` (${info.heights.map((h: string) => `${h}p`).join(', ')})` : '';
           show(`Done! Saved ${info.count} video(s)${quality} in: ${info.folder}`, `រួចរាល់! បានរក្សាទុក ${info.count} វីដេអូ${quality} ក្នុងថត៖ ${info.folder}`);
+          if (info.notes?.length) message.append(` ⚠ ${info.notes.join(' ')}`);
           openFolder.classList.remove('hidden');
           break;
         } else {

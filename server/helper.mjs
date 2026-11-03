@@ -3,7 +3,7 @@
 // into your Downloads folder, in a folder called "TikTok Saver".
 // Start it with:  npm run helper
 import http from 'node:http';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import os from 'node:os';
 import path from 'node:path';
@@ -90,17 +90,109 @@ function nextNumber(dir) {
   return highest + 1;
 }
 
-function startJob(link, mode, quality, outDir) {
-  const job = { id: randomUUID(), status: 'running', files: [], message: '', folder: outDir };
+// ffmpeg writes the caption onto the picture. It is found in this order: the FFMPEG_PATH
+// setting, tools\ffmpeg next to yt-dlp, the one that came with MULTI Tools KH, then the PATH.
+function findFfmpeg() {
+  const candidates = [
+    process.env.FFMPEG_PATH,
+    path.resolve(here, '..', '..', 'tools', 'ffmpeg', 'ffmpeg.exe'),
+    path.join(os.homedir(), 'AppData', 'Local', 'Programs', 'MULTI Tools KH', 'system', 'ffmpeg', 'ffmpeg.exe'),
+  ];
+  for (const candidate of candidates) if (candidate && fs.existsSync(candidate)) return candidate;
+  const found = spawnSync('where', ['ffmpeg'], { encoding: 'utf8' });
+  const first = found.status === 0 ? found.stdout.split(/\r?\n/)[0].trim() : '';
+  return first && fs.existsSync(first) ? first : null;
+}
+const ffmpeg = findFfmpeg();
+
+// Builds the caption as an ASS subtitle file: it wraps long lines, and it draws Khmer correctly.
+function captionFile(text, width, height) {
+  const clean = Array.from(
+    text
+      .replace(/\p{Extended_Pictographic}|\uFE0F/gu, '') // emoji cannot be drawn with this font
+      .replace(/\s+/g, ' ')
+      .replace(/[\\{}]/g, '')
+      .trim(),
+  );
+  const shown = clean.length > 220 ? `${clean.slice(0, 219).join('').trimEnd()}…` : clean.join('');
+  const size = Math.max(16, Math.round(Math.min(width, height) * 0.045));
+  const sideMargin = Math.round(width * 0.06);
+  const bottomMargin = Math.round(height * 0.07);
+  return [
+    '[Script Info]',
+    'ScriptType: v4.00+',
+    `PlayResX: ${width}`,
+    `PlayResY: ${height}`,
+    'WrapStyle: 0',
+    '',
+    '[V4+ Styles]',
+    'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding',
+    `Style: Caption,Khmer UI,${size},&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,0,0,0,0,100,100,0,0,1,${Math.max(2, Math.round(size / 12))},1,2,${sideMargin},${sideMargin},${bottomMargin},1`,
+    '',
+    '[Events]',
+    'Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text',
+    `Dialogue: 0,0:00:00.00,9:59:59.00,Caption,,0,0,0,,${shown}`,
+    '',
+  ].join('\n');
+}
+
+// Writes the caption onto the video, then replaces the saved file with the new one.
+function addCaption(file, text, width, height) {
+  return new Promise((resolve, reject) => {
+    const work = fs.mkdtempSync(path.join(os.tmpdir(), 'tiktok-saver-'));
+    const cleanUp = () => fs.rmSync(work, { recursive: true, force: true });
+    try {
+      fs.writeFileSync(path.join(work, 'caption.ass'), captionFile(text, width, height), 'utf8');
+      const font = 'C:\\Windows\\Fonts\\KhmerUI.ttf';
+      if (fs.existsSync(font)) fs.copyFileSync(font, path.join(work, 'KhmerUI.ttf'));
+    } catch (err) {
+      cleanUp();
+      return reject(err);
+    }
+    const made = path.join(work, 'captioned.mp4');
+    const args = [
+      '-y', '-hide_banner', '-loglevel', 'error',
+      '-i', file,
+      '-vf', 'subtitles=caption.ass:fontsdir=.',
+      '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20',
+      '-c:a', 'copy',
+      '-movflags', '+faststart',
+      made,
+    ];
+    const child = spawn(ffmpeg, args, { cwd: work, windowsHide: true });
+    let errors = '';
+    child.stderr.on('data', (chunk) => {
+      errors += chunk;
+    });
+    child.on('error', (err) => {
+      cleanUp();
+      reject(err);
+    });
+    child.on('close', (code) => {
+      try {
+        if (code !== 0 || !fs.existsSync(made)) throw new Error(errors.trim().split('\n').slice(-2).join(' ') || `ffmpeg stopped (code ${code})`);
+        fs.copyFileSync(made, `${file}.new`);
+        fs.renameSync(`${file}.new`, file);
+        resolve();
+      } catch (err) {
+        reject(err);
+      } finally {
+        cleanUp();
+      }
+    });
+  });
+}
+
+function startJob(link, mode, quality, outDir, withCaption) {
+  const job = { id: randomUUID(), status: 'running', stage: 'downloading', files: [], captioned: 0, notes: [], message: '', folder: outDir };
   jobs.set(job.id, job);
 
   const name = '%(autonumber)03d - %(title,id).80B';
   const args = [
     '--newline',
     '--no-simulate',
-    '--print', 'after_move:%(height)s|%(filepath)s',
-    // Also save the full caption in a text file with the same name.
-    '--print-to-file', '%(description,title)s', `${outDir}/${name}.txt`,
+    // One line of JSON per saved video: its size, its file, and its caption.
+    '--print', 'after_move:%(.{height,width,filepath,description,title})j',
     '--no-warnings',
     '-P', outDir,
     '-o', `${name}.%(ext)s`,
@@ -120,8 +212,16 @@ function startJob(link, mode, quality, outDir) {
     buffer += chunk;
     const lines = buffer.split(/\r?\n/);
     buffer = lines.pop() ?? '';
-    for (const line of lines) if (line.trim()) job.files.push(line.trim());
+    for (const line of lines) saveLine(line);
   });
+  function saveLine(line) {
+    try {
+      const item = JSON.parse(line);
+      if (item && typeof item.filepath === 'string') job.files.push(item);
+    } catch {
+      // Not a video line: ignore it.
+    }
+  }
   child.stderr.on('data', (chunk) => {
     errors += chunk;
   });
@@ -129,15 +229,33 @@ function startJob(link, mode, quality, outDir) {
     job.status = 'error';
     job.message = `Could not start yt-dlp: ${err.message}`;
   });
-  child.on('close', () => {
-    if (buffer.trim()) job.files.push(buffer.trim());
+  child.on('close', async () => {
+    if (buffer.trim()) saveLine(buffer);
     if (job.status === 'error') return;
-    if (job.files.length > 0) {
-      job.status = 'done';
-    } else {
+    if (job.files.length === 0) {
       job.status = 'error';
       job.message = errors.trim().split('\n').slice(-3).join(' ') || 'No video was saved.';
+      return;
     }
+    if (withCaption && !ffmpeg) job.notes.push('The caption was not added, because ffmpeg was not found.');
+    if (withCaption && ffmpeg) {
+      job.stage = 'captioning';
+      for (const item of job.files) {
+        const text = String(item.description || item.title || '').trim();
+        if (!text) {
+          job.captioned += 1;
+          continue;
+        }
+        try {
+          await addCaption(item.filepath, text, Number(item.width) || 1080, Number(item.height) || 1920);
+        } catch (err) {
+          job.notes.push(`The caption could not be added to one video: ${err.message}`);
+        }
+        job.captioned += 1;
+      }
+    }
+    job.stage = 'done';
+    job.status = 'done';
   });
   return job;
 }
@@ -183,7 +301,7 @@ const server = http.createServer((req, res) => {
 
       if (typeof data.link !== 'string' || !isTikTok(data.link.trim())) return send(res, 400, { error: 'Not a TikTok link' });
       const quality = qualities.includes(String(data.quality)) ? String(data.quality) : 'best';
-      const job = startJob(data.link.trim(), data.mode === 'all' ? 'all' : 'one', quality, resolveFolder(data.folder));
+      const job = startJob(data.link.trim(), data.mode === 'all' ? 'all' : 'one', quality, resolveFolder(data.folder), data.caption !== false);
       send(res, 200, { id: job.id });
     });
     return;
@@ -193,9 +311,17 @@ const server = http.createServer((req, res) => {
   if (match) {
     const job = jobs.get(match[1]);
     if (!job) return send(res, 404, { error: 'Unknown job' });
-    // Each saved line looks like "1080|C:\...\001 - caption.mp4": the quality, then the file.
-    const heights = [...new Set(job.files.map((line) => line.split('|')[0]).filter((h) => /^\d+$/.test(h)))];
-    return send(res, 200, { status: job.status, count: job.files.length, heights, message: job.message, folder: job.folder });
+    const heights = [...new Set(job.files.map((item) => item.height).filter((h) => Number.isInteger(h)))];
+    return send(res, 200, {
+      status: job.status,
+      stage: job.stage,
+      count: job.files.length,
+      captioned: job.captioned,
+      heights,
+      notes: job.notes,
+      message: job.message,
+      folder: job.folder,
+    });
   }
 
   send(res, 404, { error: 'Not found' });
@@ -209,4 +335,5 @@ fs.mkdirSync(defaultDir, { recursive: true });
 server.listen(PORT, '127.0.0.1', () => {
   console.log(`Helper is ready on http://127.0.0.1:${PORT}`);
   console.log(`Videos are saved in: ${defaultDir} (unless you choose another folder on the page)`);
+  console.log(ffmpeg ? `Captions on the video: ready (ffmpeg: ${ffmpeg})` : 'Captions on the video: NOT available (ffmpeg not found)');
 });
