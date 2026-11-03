@@ -79,6 +79,43 @@ import Footer from '../components/Footer.astro';
           placeholder="https://www.tiktok.com/..."
           class="mt-3 w-full rounded-xl border border-ink/20 bg-paper px-4 py-3 text-base outline-none focus:border-brand"
         />
+        <p class="mt-5 font-display text-lg font-bold">
+          Save to
+          <span class="km text-base" lang="km">រក្សាទុកទៅ</span>
+        </p>
+        <div class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <p id="folder-path" class="min-w-0 flex-1 rounded-xl border border-ink/20 bg-paper px-4 py-3 text-sm break-all">…</p>
+          <button
+            id="choose-folder"
+            type="button"
+            class="rounded-full border border-ink/20 bg-white px-5 py-2 font-semibold transition hover:border-ink/50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Choose folder <span lang="km" class="font-khmer font-normal opacity-70">ជ្រើសរើសថត</span>
+          </button>
+        </div>
+
+        <label for="quality" class="mt-5 block font-display text-lg font-bold">
+          Quality
+          <span class="km text-base" lang="km">គុណភាព</span>
+        </label>
+        <select
+          id="quality"
+          class="mt-2 w-full rounded-xl border border-ink/20 bg-paper px-4 py-3 text-base outline-none focus:border-brand"
+        >
+          <option value="best">Best available (recommended)</option>
+          <option value="2160">4K (2160p)</option>
+          <option value="1440">1440p</option>
+          <option value="1080">1080p</option>
+          <option value="720">720p</option>
+          <option value="480">480p</option>
+          <option value="360">360p</option>
+          <option value="240">240p</option>
+          <option value="144">144p</option>
+        </select>
+        <p class="mt-2 text-sm text-muted">
+          TikTok decides which qualities a video has. If it has no 4K, you get the best one it has.
+          <span class="km" lang="km">TikTok កំណត់ថាវីដេអូមានគុណភាពអ្វីខ្លះ។ បើវាគ្មាន 4K អ្នកនឹងទទួលបានគុណភាពល្អបំផុតដែលវាមាន។</span>
+        </p>
         <div class="mt-4 flex flex-col gap-3 sm:flex-row">
           <button
             type="button"
@@ -190,7 +227,7 @@ import Footer from '../components/Footer.astro';
         start = await fetch(`${HELPER}/download`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'X-TikTok-Saver': '1' },
-          body: JSON.stringify({ link: input.value.trim(), mode }),
+          body: JSON.stringify({ link: input.value.trim(), mode, quality: document.querySelector<HTMLSelectElement>('#quality')!.value, folder }),
         });
       } catch {
         // The browser could not reach the helper at all.
@@ -219,7 +256,8 @@ import Footer from '../components/Footer.astro';
         if (info.status === 'running') {
           show(`Saved ${info.count} video(s) so far…`, `បានរក្សាទុក ${info.count} វីដេអូរហូតមកដល់ឥឡូវ…`);
         } else if (info.status === 'done') {
-          show(`Done! Saved ${info.count} video(s) in: ${info.folder}`, `រួចរាល់! បានរក្សាទុក ${info.count} វីដេអូក្នុងថត៖ ${info.folder}`);
+          const quality = info.heights?.length ? ` (${info.heights.map((h: string) => `${h}p`).join(', ')})` : '';
+          show(`Done! Saved ${info.count} video(s)${quality} in: ${info.folder}`, `រួចរាល់! បានរក្សាទុក ${info.count} វីដេអូ${quality} ក្នុងថត៖ ${info.folder}`);
           openFolder.classList.remove('hidden');
           break;
         } else {
@@ -242,8 +280,52 @@ import Footer from '../components/Footer.astro';
     button.addEventListener('click', () => choose(button.dataset.mode ?? 'one'));
   }
 
+  // The folder where videos are saved. The choice is remembered in this browser.
+  const folderPath = document.querySelector<HTMLElement>('#folder-path')!;
+  const chooseButton = document.querySelector<HTMLButtonElement>('#choose-folder')!;
+  let folder = '';
+  try {
+    folder = localStorage.getItem('saveFolder') ?? '';
+  } catch {
+    folder = '';
+  }
+  if (folder) folderPath.textContent = folder;
+
+  function setFolder(path: string) {
+    folder = path;
+    folderPath.textContent = path;
+    try {
+      localStorage.setItem('saveFolder', path);
+    } catch {
+      // The browser will not remember it. That is fine.
+    }
+  }
+
   openFolder.addEventListener('click', () => {
-    fetch(`${HELPER}/open-folder`, { method: 'POST', headers: { 'X-TikTok-Saver': '1' } }).catch(() => {});
+    fetch(`${HELPER}/open-folder`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-TikTok-Saver': '1' },
+      body: JSON.stringify({ folder }),
+    }).catch(() => {});
+  });
+
+  chooseButton.addEventListener('click', async () => {
+    chooseButton.disabled = true;
+    show('A window opened to choose a folder. It may be behind this page. Look at your taskbar.', 'បង្អួចមួយបានបើកដើម្បីជ្រើសរើសថត។ វាអាចនៅពីក្រោយទំព័រនេះ។ សូមមើលរបារកិច្ចការរបស់អ្នក។');
+    try {
+      const reply = await fetch(`${HELPER}/choose-folder`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-TikTok-Saver': '1' },
+        body: JSON.stringify({ folder }),
+      });
+      const picked = (await reply.json()).folder;
+      if (picked) setFolder(picked);
+      message.classList.add('hidden');
+    } catch {
+      show('Could not open the folder window. Check that the helper is running.', 'មិនអាចបើកបង្អួចថតបានទេ។ សូមពិនិត្យថាកម្មវិធីជំនួយកំពុងដំណើរការ។');
+    } finally {
+      chooseButton.disabled = false;
+    }
   });
 
   // Checks that the helper is ready. If not, say what to do and switch the buttons off.
@@ -251,7 +333,10 @@ import Footer from '../components/Footer.astro';
     let ready = false;
     try {
       const reply = await fetch(`${HELPER}/ping`);
-      ready = reply.ok && (await reply.json()).ok === true;
+      const info = await reply.json();
+      ready = reply.ok && info.ok === true;
+      // First time: show the helper's own default folder.
+      if (ready && !folder) setFolder(info.folder);
     } catch {
       ready = false;
     }
@@ -260,6 +345,7 @@ import Footer from '../components/Footer.astro';
       button.classList.toggle('opacity-50', !ready);
       button.classList.toggle('cursor-not-allowed', !ready);
     }
+    chooseButton.disabled = !ready;
     if (ready) {
       banner.classList.add('hidden');
       return;
