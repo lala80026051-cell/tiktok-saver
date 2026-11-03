@@ -130,12 +130,25 @@ import Footer from '../components/Footer.astro';
     busy = true;
     show('Working… please wait. Big profiles can take a long time.', 'កំពុងដំណើរការ… សូមរង់ចាំ។ ប្រូហ្វាល់ធំអាចចំណាយពេលយូរ។');
     try {
-      const start = await fetch(`${HELPER}/download`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ link: input.value.trim(), mode }),
-      });
-      if (!start.ok) throw new Error('rejected');
+      let start: Response;
+      try {
+        start = await fetch(`${HELPER}/download`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ link: input.value.trim(), mode }),
+        });
+      } catch {
+        // The browser could not reach the helper at all.
+        show(
+          'The helper program is not running. Open a terminal in your project and run: npm run helper',
+          'កម្មវិធីជំនួយមិនដំណើរការទេ។ បើក terminal ក្នុងគម្រោងរបស់អ្នក ហើយរត់៖ npm run helper',
+        );
+        return;
+      }
+      if (!start.ok) {
+        show('The helper did not accept this link. Please copy the link again from TikTok.', 'កម្មវិធីជំនួយមិនទទួលតំណនេះទេ។ សូមចម្លងតំណម្តងទៀតពី TikTok។');
+        return;
+      }
       const { id } = await start.json();
       while (true) {
         await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -151,10 +164,7 @@ import Footer from '../components/Footer.astro';
         }
       }
     } catch {
-      show(
-        'The helper program is not running. Open a terminal in your project and run: npm run helper',
-        'កម្មវិធីជំនួយមិនដំណើរការទេ។ បើក terminal ក្នុងគម្រោងរបស់អ្នក ហើយរត់៖ npm run helper',
-      );
+      show('Lost contact with the helper while saving. Check that it is still running, then try again.', 'បាត់ទំនាក់ទំនងជាមួយកម្មវិធីជំនួយពេលកំពុងរក្សាទុក។ សូមពិនិត្យថាវានៅដំណើរការ ហើយព្យាយាមម្តងទៀត។');
     } finally {
       busy = false;
     }
