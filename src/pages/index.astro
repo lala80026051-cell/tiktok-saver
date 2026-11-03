@@ -118,7 +118,46 @@ import Footer from '../components/Footer.astro';
       );
       return;
     }
-    show('The link is good! The saving part is not connected yet. We build it next.', 'តំណត្រឹមត្រូវ! ផ្នែករក្សាទុកមិនទាន់ភ្ជាប់នៅឡើយទេ។ យើងនឹងសាងសង់វាបន្ទាប់។');
+    save(mode);
+  }
+
+  // Sends the link to the helper program on this computer, then checks on it until it is done.
+  const HELPER = 'http://127.0.0.1:4330';
+  let busy = false;
+
+  async function save(mode: string) {
+    if (busy) return;
+    busy = true;
+    show('Working… please wait. Big profiles can take a long time.', 'កំពុងដំណើរការ… សូមរង់ចាំ។ ប្រូហ្វាល់ធំអាចចំណាយពេលយូរ។');
+    try {
+      const start = await fetch(`${HELPER}/download`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ link: input.value.trim(), mode }),
+      });
+      if (!start.ok) throw new Error('rejected');
+      const { id } = await start.json();
+      while (true) {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        const info = await (await fetch(`${HELPER}/status/${id}`)).json();
+        if (info.status === 'running') {
+          show(`Saved ${info.count} video(s) so far…`, `បានរក្សាទុក ${info.count} វីដេអូរហូតមកដល់ឥឡូវ…`);
+        } else if (info.status === 'done') {
+          show(`Done! Saved ${info.count} video(s) in: ${info.folder}`, `រួចរាល់! បានរក្សាទុក ${info.count} វីដេអូក្នុងថត៖ ${info.folder}`);
+          break;
+        } else {
+          show(`Could not save the video. ${info.message}`, 'មិនអាចរក្សាទុកវីដេអូបានទេ។ TikTok អាចរារាំង ឬវីដេអូជាឯកជន។');
+          break;
+        }
+      }
+    } catch {
+      show(
+        'The helper program is not running. Open a terminal in your project and run: npm run helper',
+        'កម្មវិធីជំនួយមិនដំណើរការទេ។ បើក terminal ក្នុងគម្រោងរបស់អ្នក ហើយរត់៖ npm run helper',
+      );
+    } finally {
+      busy = false;
+    }
   }
 
   for (const button of document.querySelectorAll<HTMLButtonElement>('.mode-button')) {
