@@ -359,7 +359,15 @@ const server = http.createServer((req, res) => {
   if (match) {
     const job = jobs.get(match[1]);
     if (!job) return send(res, 404, { error: 'Unknown job' });
-    const heights = [...new Set(job.files.map((item) => item.height).filter((h) => Number.isInteger(h)))];
+    // The "p" number is the SHORT side of the picture, the way YouTube and TikTok name it:
+    // a picture 1080 wide and 1440 tall is "1080p".
+    const heights = [
+      ...new Set(
+        job.files
+          .map((item) => (Number.isInteger(item.width) && Number.isInteger(item.height) ? Math.min(item.width, item.height) : item.height))
+          .filter((h) => Number.isInteger(h)),
+      ),
+    ];
     return send(res, 200, {
       status: job.status,
       stage: job.stage,
