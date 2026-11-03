@@ -122,7 +122,7 @@ import Footer from '../components/Footer.astro';
   }
 
   // Sends the link to the helper program on this computer, then checks on it until it is done.
-  const HELPER = 'http://127.0.0.1:4330';
+  const HELPER = '/helper';
   let busy = false;
 
   async function save(mode: string) {
