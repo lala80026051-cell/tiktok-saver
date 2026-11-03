@@ -83,14 +83,22 @@ import Footer from '../components/Footer.astro';
           Save to
           <span class="km text-base" lang="km">រក្សាទុកទៅ</span>
         </p>
-        <div class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <p id="folder-path" class="min-w-0 flex-1 rounded-xl border border-ink/20 bg-paper px-4 py-3 text-sm break-all">…</p>
+        <!-- The folder name has its own full-width row. The two buttons sit in a row below it. -->
+        <p id="folder-path" class="mt-2 w-full rounded-xl border border-ink/20 bg-paper px-4 py-3 text-sm break-words">…</p>
+        <div class="mt-3 flex flex-wrap gap-3">
           <button
             id="choose-folder"
             type="button"
             class="rounded-full border border-ink/20 bg-white px-5 py-2 font-semibold transition hover:border-ink/50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Choose folder <span lang="km" class="font-khmer font-normal opacity-70">ជ្រើសរើសថត</span>
+          </button>
+          <button
+            id="open-folder"
+            type="button"
+            class="rounded-full bg-ink px-5 py-2 font-semibold text-paper transition hover:bg-brand disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            📂 Open folder <span lang="km" class="font-khmer font-normal opacity-80">បើកថតមើលវីដេអូ</span>
           </button>
         </div>
 
@@ -142,6 +150,14 @@ import Footer from '../components/Footer.astro';
           >
             Download all videos <span lang="km" class="font-khmer font-normal opacity-70">ទាញយកវីដេអូទាំងអស់</span>
           </button>
+          <button
+            id="stop"
+            type="button"
+            disabled
+            class="rounded-full bg-red-600 px-6 py-3 font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-ink/20 disabled:text-ink/40"
+          >
+            ⏹ Stop download <span lang="km" class="font-khmer font-normal opacity-80">បញ្ឈប់ការទាញយក</span>
+          </button>
         </div>
         <ul class="mt-4 space-y-2 text-sm text-muted">
           <li>
@@ -154,13 +170,6 @@ import Footer from '../components/Footer.astro';
           </li>
         </ul>
         <p id="message" role="status" class="mt-4 hidden rounded-xl bg-paper p-4"></p>
-        <button
-          id="open-folder"
-          type="button"
-          class="mt-3 hidden rounded-full border border-ink/20 bg-white px-5 py-2 text-sm font-semibold transition hover:border-ink/50"
-        >
-          Open folder <span lang="km" class="font-khmer font-normal opacity-70">បើកថត</span>
-        </button>
       </form>
 
       <p class="mt-6 text-sm text-muted">
@@ -226,11 +235,25 @@ import Footer from '../components/Footer.astro';
   // Sends the link to the helper program on this computer, then checks on it until it is done.
   const HELPER = '/helper';
   let busy = false;
+  let currentJob = '';
+  const stopButton = document.querySelector<HTMLButtonElement>('#stop')!;
+
+  // The Stop button: asks the helper to stop. The page then shows "Stopped" by itself.
+  stopButton.addEventListener('click', () => {
+    if (!currentJob) return;
+    stopButton.disabled = true;
+    fetch(`${HELPER}/stop`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-TikTok-Saver': '1' },
+      body: JSON.stringify({ id: currentJob }),
+    }).catch(() => {
+      stopButton.disabled = false;
+    });
+  });
 
   async function save(mode: string) {
     if (busy) return;
     busy = true;
-    openFolder.classList.add('hidden');
     show('Working… please wait. Big profiles can take a long time.', 'កំពុងដំណើរការ… សូមរង់ចាំ។ ប្រូហ្វាល់ធំអាចចំណាយពេលយូរ។');
     try {
       let start: Response;
@@ -261,6 +284,8 @@ import Footer from '../components/Footer.astro';
         return;
       }
       const { id } = await start.json();
+      currentJob = id;
+      stopButton.disabled = false;
       while (true) {
         await new Promise((resolve) => setTimeout(resolve, 1500));
         const info = await (await fetch(`${HELPER}/status/${id}`)).json();
@@ -270,9 +295,14 @@ import Footer from '../components/Footer.astro';
           show(`Saved ${info.count} video(s) so far…`, `បានរក្សាទុក ${info.count} វីដេអូរហូតមកដល់ឥឡូវ…`);
         } else if (info.status === 'done') {
           const quality = info.heights?.length ? ` (${info.heights.map((h: string) => `${h}p`).join(', ')})` : '';
-          show(`Done! Saved ${info.count} video(s)${quality} in: ${info.folder}`, `រួចរាល់! បានរក្សាទុក ${info.count} វីដេអូ${quality} ក្នុងថត៖ ${info.folder}`);
+          show(`✅ Finish download. Saved ${info.count} video(s)${quality} in: ${info.folder}`, `✅ ការទាញយកបានបញ្ចប់។ បានរក្សាទុក ${info.count} វីដេអូ${quality} ក្នុងថត៖ ${info.folder}`);
           if (info.notes?.length) message.append(` ⚠ ${info.notes.join(' ')}`);
-          openFolder.classList.remove('hidden');
+          break;
+        } else if (info.status === 'stopped') {
+          show(
+            `Stopped. ${info.count} video(s) were already saved and are still in your folder.`,
+            `បានបញ្ឈប់។ មាន ${info.count} វីដេអូត្រូវបានរក្សាទុករួចហើយ ហើយនៅក្នុងថតរបស់អ្នកនៅឡើយ។`,
+          );
           break;
         } else {
           show(`Could not save the video. ${info.message}`, 'មិនអាចរក្សាទុកវីដេអូបានទេ។ TikTok អាចរារាំង ឬវីដេអូជាឯកជន។');
@@ -283,6 +313,8 @@ import Footer from '../components/Footer.astro';
       show('Lost contact with the helper while saving. Check that it is still running, then try again.', 'បាត់ទំនាក់ទំនងជាមួយកម្មវិធីជំនួយពេលកំពុងរក្សាទុក។ សូមពិនិត្យថាវានៅដំណើរការ ហើយព្យាយាមម្តងទៀត។');
     } finally {
       busy = false;
+      currentJob = '';
+      stopButton.disabled = true;
     }
   }
 
@@ -360,6 +392,7 @@ import Footer from '../components/Footer.astro';
       button.classList.toggle('cursor-not-allowed', !ready);
     }
     chooseButton.disabled = !ready;
+    openFolder.disabled = !ready;
     if (ready) {
       banner.classList.add('hidden');
       return;

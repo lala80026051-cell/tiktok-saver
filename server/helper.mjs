@@ -109,13 +109,15 @@ const ffmpeg = findFfmpeg();
 function captionFile(text, width, height) {
   const clean = Array.from(
     text
-      .replace(/\p{Extended_Pictographic}|\uFE0F/gu, '') // emoji cannot be drawn with this font
       .replace(/\s+/g, ' ')
       .replace(/[\\{}]/g, '')
       .trim(),
   );
-  const shown = clean.length > 220 ? `${clean.slice(0, 219).join('').trimEnd()}…` : clean.join('');
-  const size = Math.max(16, Math.round(Math.min(width, height) * 0.045));
+  // The whole caption is shown. A long caption gets smaller letters so that it still fits.
+  const shown = clean.join('');
+  const base = Math.min(width, height) * 0.045;
+  const fit = Math.max(0.45, Math.min(1, Math.sqrt(150 / Math.max(1, clean.length))));
+  const size = Math.max(12, Math.round(base * fit));
   const sideMargin = Math.round(width * 0.06);
   const bottomMargin = Math.round(height * 0.07);
   return [
@@ -137,14 +139,17 @@ function captionFile(text, width, height) {
 }
 
 // Writes the caption onto the video, then replaces the saved file with the new one.
-function addCaption(file, text, width, height) {
+function addCaption(job, file, text, width, height) {
   return new Promise((resolve, reject) => {
     const work = fs.mkdtempSync(path.join(os.tmpdir(), 'tiktok-saver-'));
     const cleanUp = () => fs.rmSync(work, { recursive: true, force: true });
     try {
       fs.writeFileSync(path.join(work, 'caption.ass'), captionFile(text, width, height), 'utf8');
-      const font = 'C:\\Windows\\Fonts\\KhmerUI.ttf';
-      if (fs.existsSync(font)) fs.copyFileSync(font, path.join(work, 'KhmerUI.ttf'));
+      // KhmerUI draws Khmer and English. The other two draw emoji and symbols.
+      for (const font of ['KhmerUI.ttf', 'seguiemj.ttf', 'seguisym.ttf']) {
+        const source = path.join('C:\\Windows\\Fonts', font);
+        if (fs.existsSync(source)) fs.copyFileSync(source, path.join(work, font));
+      }
     } catch (err) {
       cleanUp();
       return reject(err);
@@ -160,6 +165,7 @@ function addCaption(file, text, width, height) {
       made,
     ];
     const child = spawn(ffmpeg, args, { cwd: work, windowsHide: true });
+    job.current = child; // so the Stop button can stop it
     let errors = '';
     child.stderr.on('data', (chunk) => {
       errors += chunk;
@@ -183,8 +189,29 @@ function addCaption(file, text, width, height) {
   });
 }
 
+// Stops a running job: its programs are stopped at once (with everything they started),
+// and the half-finished download files it left behind are removed.
+function stopJob(job) {
+  if (job.status !== 'running') return;
+  job.stopped = true;
+  if (job.current?.pid) spawnSync('taskkill', ['/PID', String(job.current.pid), '/T', '/F'], { windowsHide: true });
+}
+
+function removePartialFiles(dir, since) {
+  try {
+    for (const name of fs.readdirSync(dir)) {
+      if (!/\.(part|ytdl|temp)$|\.part-Frag\d+$|\.new$/i.test(name)) continue;
+      const file = path.join(dir, name);
+      if (fs.statSync(file).mtimeMs >= since - 2000) fs.rmSync(file, { force: true });
+    }
+  } catch {
+    // The folder cannot be read: nothing to clean.
+  }
+}
+
 function startJob(link, mode, quality, outDir, withCaption) {
-  const job = { id: randomUUID(), status: 'running', stage: 'downloading', files: [], captioned: 0, notes: [], message: '', folder: outDir };
+  const job = { id: randomUUID(), status: 'running', stage: 'downloading', stopped: false, current: null, files: [], captioned: 0, notes: [], message: '', folder: outDir };
+  const startedAt = Date.now();
   jobs.set(job.id, job);
 
   const name = '%(autonumber)03d - %(title,id).80B';
@@ -206,6 +233,7 @@ function startJob(link, mode, quality, outDir, withCaption) {
   args.push('--', link);
 
   const child = spawn(ytdlp, args, { windowsHide: true });
+  job.current = child;
   let errors = '';
   let buffer = '';
   child.stdout.on('data', (chunk) => {
@@ -232,6 +260,11 @@ function startJob(link, mode, quality, outDir, withCaption) {
   child.on('close', async () => {
     if (buffer.trim()) saveLine(buffer);
     if (job.status === 'error') return;
+    if (job.stopped) {
+      removePartialFiles(outDir, startedAt);
+      job.status = 'stopped';
+      return;
+    }
     if (job.files.length === 0) {
       job.status = 'error';
       job.message = errors.trim().split('\n').slice(-3).join(' ') || 'No video was saved.';
@@ -240,19 +273,26 @@ function startJob(link, mode, quality, outDir, withCaption) {
     if (withCaption && !ffmpeg) job.notes.push('The caption was not added, because ffmpeg was not found.');
     if (withCaption && ffmpeg) {
       job.stage = 'captioning';
+      // Each video gets its own caption, taken from that same video.
       for (const item of job.files) {
+        if (job.stopped) break;
         const text = String(item.description || item.title || '').trim();
         if (!text) {
           job.captioned += 1;
           continue;
         }
         try {
-          await addCaption(item.filepath, text, Number(item.width) || 1080, Number(item.height) || 1920);
+          await addCaption(job, item.filepath, text, Number(item.width) || 1080, Number(item.height) || 1920);
         } catch (err) {
-          job.notes.push(`The caption could not be added to one video: ${err.message}`);
+          if (!job.stopped) job.notes.push(`The caption could not be added to one video: ${err.message}`);
         }
         job.captioned += 1;
       }
+    }
+    if (job.stopped) {
+      removePartialFiles(outDir, startedAt);
+      job.status = 'stopped';
+      return;
     }
     job.stage = 'done';
     job.status = 'done';
@@ -272,7 +312,7 @@ const server = http.createServer((req, res) => {
   if (req.method === 'GET' && req.url === '/ping') return send(res, 200, { ok: true, folder: defaultDir });
 
   // The three requests below change things, so they need the special header.
-  if (req.method === 'POST' && ['/download', '/open-folder', '/choose-folder'].includes(req.url ?? '')) {
+  if (req.method === 'POST' && ['/download', '/open-folder', '/choose-folder', '/stop'].includes(req.url ?? '')) {
     if (req.headers[requiredHeader] !== '1') return send(res, 403, { error: 'Not allowed' });
     let body = '';
     req.on('data', (chunk) => {
@@ -285,6 +325,14 @@ const server = http.createServer((req, res) => {
         data = body ? JSON.parse(body) : {};
       } catch {
         return send(res, 400, { error: 'Bad request' });
+      }
+
+      // The Stop button.
+      if (req.url === '/stop') {
+        const job = typeof data.id === 'string' ? jobs.get(data.id) : undefined;
+        if (!job) return send(res, 404, { error: 'Unknown job' });
+        stopJob(job);
+        return send(res, 200, { ok: true });
       }
 
       // Opens the folder in Windows File Explorer.
