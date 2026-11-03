@@ -87,6 +87,16 @@ function send(res, code, body) {
 const server = http.createServer((req, res) => {
   if (req.method === 'OPTIONS') return send(res, 204, {});
 
+  // The page asks this when it opens, to know the helper is ready.
+  if (req.method === 'GET' && req.url === '/ping') return send(res, 200, { ok: true });
+
+  // Opens the folder with the saved videos in Windows File Explorer.
+  if (req.method === 'POST' && req.url === '/open-folder') {
+    if (req.headers[requiredHeader] !== '1') return send(res, 403, { error: 'Not allowed' });
+    spawn('explorer.exe', [outDir], { detached: true, stdio: 'ignore' }).unref();
+    return send(res, 200, { ok: true });
+  }
+
   if (req.method === 'POST' && req.url === '/download') {
     if (req.headers[requiredHeader] !== '1') return send(res, 403, { error: 'Not allowed' });
     let body = '';
