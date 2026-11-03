@@ -15,8 +15,10 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const ytdlp = process.env.YTDLP_PATH ?? path.resolve(here, '..', '..', 'tools', 'yt-dlp', 'yt-dlp.exe');
 const outDir = path.join(os.homedir(), 'Downloads', 'TikTok Saver');
 
-// Only pages from this computer may talk to the helper.
-const allowedOrigin = /^http:\/\/(localhost|127\.0\.0\.1):\d+$/;
+// The website passes requests to the helper through its own address (/helper).
+// Other websites cannot add this special header without the browser asking
+// first, so a request that has it comes from our own page.
+const requiredHeader = 'x-tiktok-saver';
 
 // Only real TikTok links are accepted.
 function isTikTok(text) {
@@ -77,22 +79,16 @@ function startJob(link, mode) {
   return job;
 }
 
-function send(res, origin, code, body) {
-  res.writeHead(code, {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': origin ?? 'null',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  });
+function send(res, code, body) {
+  res.writeHead(code, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(body));
 }
 
 const server = http.createServer((req, res) => {
-  const origin = req.headers.origin;
-  if (origin && !allowedOrigin.test(origin)) return send(res, null, 403, { error: 'Not allowed' });
-  if (req.method === 'OPTIONS') return send(res, origin, 204, {});
+  if (req.method === 'OPTIONS') return send(res, 204, {});
 
   if (req.method === 'POST' && req.url === '/download') {
+    if (req.headers[requiredHeader] !== '1') return send(res, 403, { error: 'Not allowed' });
     let body = '';
     req.on('data', (chunk) => {
       body += chunk;
@@ -103,11 +99,11 @@ const server = http.createServer((req, res) => {
       try {
         data = JSON.parse(body);
       } catch {
-        return send(res, origin, 400, { error: 'Bad request' });
+        return send(res, 400, { error: 'Bad request' });
       }
-      if (typeof data.link !== 'string' || !isTikTok(data.link.trim())) return send(res, origin, 400, { error: 'Not a TikTok link' });
+      if (typeof data.link !== 'string' || !isTikTok(data.link.trim())) return send(res, 400, { error: 'Not a TikTok link' });
       const job = startJob(data.link.trim(), data.mode === 'all' ? 'all' : 'one');
-      send(res, origin, 200, { id: job.id });
+      send(res, 200, { id: job.id });
     });
     return;
   }
@@ -115,11 +111,11 @@ const server = http.createServer((req, res) => {
   const match = req.method === 'GET' && req.url?.match(/^\/status\/([0-9a-f-]{36})$/);
   if (match) {
     const job = jobs.get(match[1]);
-    if (!job) return send(res, origin, 404, { error: 'Unknown job' });
-    return send(res, origin, 200, { status: job.status, count: job.files.length, message: job.message, folder: job.folder });
+    if (!job) return send(res, 404, { error: 'Unknown job' });
+    return send(res, 200, { status: job.status, count: job.files.length, message: job.message, folder: job.folder });
   }
 
-  send(res, origin, 404, { error: 'Not found' });
+  send(res, 404, { error: 'Not found' });
 });
 
 if (!fs.existsSync(ytdlp)) {

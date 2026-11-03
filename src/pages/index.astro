@@ -134,7 +134,7 @@ import Footer from '../components/Footer.astro';
       try {
         start = await fetch(`${HELPER}/download`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'X-TikTok-Saver': '1' },
           body: JSON.stringify({ link: input.value.trim(), mode }),
         });
       } catch {
@@ -146,7 +146,7 @@ import Footer from '../components/Footer.astro';
         return;
       }
       if (!start.ok) {
-        show('The helper did not accept this link. Please copy the link again from TikTok.', 'កម្មវិធីជំនួយមិនទទួលតំណនេះទេ។ សូមចម្លងតំណម្តងទៀតពី TikTok។');
+        show(`The helper did not accept this request (code ${start.status}). Please copy the link again from TikTok.`, `កម្មវិធីជំនួយមិនទទួលសំណើនេះទេ (លេខកូដ ${start.status})។ សូមចម្លងតំណម្តងទៀតពី TikTok។`);
         return;
       }
       const { id } = await start.json();
