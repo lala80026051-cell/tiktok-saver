@@ -1,5 +1,7 @@
 node_modules/
 dist/
+# The helper programs that setup.bat downloads (yt-dlp, ffmpeg). They are not part of the project.
+tools/
 .astro/
 .wrangler/
 .dev.vars

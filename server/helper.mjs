@@ -12,7 +12,14 @@ import { fileURLToPath } from 'node:url';
 
 const PORT = 4330;
 const here = path.dirname(fileURLToPath(import.meta.url));
-const ytdlp = process.env.YTDLP_PATH ?? path.resolve(here, '..', '..', 'tools', 'yt-dlp', 'yt-dlp.exe');
+// yt-dlp is found in this order: the YTDLP_PATH setting, tools\ yt-dlp inside this project
+// (made by setup.bat), then a "tools" folder next to the project.
+const ytdlpCandidates = [
+  process.env.YTDLP_PATH,
+  path.resolve(here, '..', 'tools', 'yt-dlp', 'yt-dlp.exe'),
+  path.resolve(here, '..', '..', 'tools', 'yt-dlp', 'yt-dlp.exe'),
+];
+const ytdlp = ytdlpCandidates.find((candidate) => candidate && fs.existsSync(candidate)) ?? ytdlpCandidates[1];
 // Where videos go unless the page picks another folder with "Choose folder".
 const defaultDir = path.join(os.homedir(), 'Downloads', 'TikTok Saver');
 
@@ -155,6 +162,7 @@ function nextNumber(dir) {
 function findFfmpeg() {
   const candidates = [
     process.env.FFMPEG_PATH,
+    path.resolve(here, '..', 'tools', 'ffmpeg', 'ffmpeg.exe'),
     path.resolve(here, '..', '..', 'tools', 'ffmpeg', 'ffmpeg.exe'),
     path.join(os.homedir(), 'AppData', 'Local', 'Programs', 'MULTI Tools KH', 'system', 'ffmpeg', 'ffmpeg.exe'),
   ];
@@ -545,7 +553,8 @@ const server = http.createServer((req, res) => {
 });
 
 if (!fs.existsSync(ytdlp)) {
-  console.error(`yt-dlp not found at: ${ytdlp}`);
+  console.error(`yt-dlp was not found at: ${ytdlp}`);
+  console.error('Please double-click setup.bat first. It downloads the helper programs. Then start again.');
   process.exit(1);
 }
 fs.mkdirSync(defaultDir, { recursive: true });

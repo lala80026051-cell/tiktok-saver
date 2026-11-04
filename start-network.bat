@@ -10,10 +10,24 @@ rem Only use this on a Wi-Fi you trust (your home). Close the two black windows 
 rem The first time, Windows may ask to allow Node.js on the network. Choose PRIVATE networks only.
 cd /d "%~dp0"
 
+rem The helper programs (yt-dlp) come from setup.bat. Run that first on a new computer.
+if not exist "tools\yt-dlp\yt-dlp.exe" if not exist "..\tools\yt-dlp\yt-dlp.exe" (
+  echo The helper programs are not installed yet.
+  echo Please double-click setup.bat first. Then double-click start-network.bat again.
+  echo.
+  pause
+  exit /b 1
+)
+
 if not exist node_modules (
   echo First time: installing the website parts. Please wait...
   call npm.cmd install
 )
+
+rem Stop whatever already uses the two ports (for example an earlier start.bat). Otherwise the old
+rem helper, which has no code, would stay running and other devices would be refused.
+powershell -NoProfile -Command "foreach ($port in 4323,4330) { Get-NetTCPConnection -State Listen -LocalPort $port -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue } }"
+timeout /t 2 /nobreak >nul
 
 rem A random 6-digit code.
 for /f %%i in ('powershell -NoProfile -Command "Get-Random -Minimum 100000 -Maximum 999999"') do set SAVER_PIN=%%i
@@ -22,7 +36,7 @@ rem The address of this computer on your home network (not a VPN or a virtual ad
 for /f "usebackq delims=" %%i in (`powershell -NoProfile -Command "(Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -match '^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.)' -and $_.InterfaceAlias -notmatch 'VPN|WireGuard|Surfshark|Virtual|vEthernet|Loopback|Bluetooth' } | Select-Object -First 1).IPAddress"`) do set LAN_IP=%%i
 
 start "TikTok Saver - helper (do not close)" cmd /k npm.cmd run helper
-start "TikTok Saver - website (do not close)" cmd /k npm.cmd run dev -- --host --port 4323
+start "TikTok Saver - website (do not close)" cmd /k npm.cmd run dev -- --host --port 4323 --strictPort
 
 echo.
 echo ==============================================================
