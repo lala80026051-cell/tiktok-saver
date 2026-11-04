@@ -200,13 +200,45 @@ function stopJob(job) {
 function removePartialFiles(dir, since) {
   try {
     for (const name of fs.readdirSync(dir)) {
-      if (!/\.(part|ytdl|temp)$|\.part-Frag\d+$|\.new$/i.test(name)) continue;
+      if (!/\.(part|ytdl|temp|tmp)$|\.part-Frag\d+$|\.new$/i.test(name)) continue;
       const file = path.join(dir, name);
       if (fs.statSync(file).mtimeMs >= since - 2000) fs.rmSync(file, { force: true });
     }
   } catch {
     // The folder cannot be read: nothing to clean.
   }
+}
+
+// A link to ONE video (not to an account): a video or photo page, or a short share link.
+function isVideoLink(link) {
+  try {
+    const url = new URL(link);
+    const pathName = url.pathname.replace(/\/+$/, '');
+    if (/^\/@[^/]+\/(video|photo)\/\d+/.test(pathName)) return true;
+    return url.hostname.startsWith('vm.') || url.hostname.startsWith('vt.') || pathName.startsWith('/t/');
+  } catch {
+    return false;
+  }
+}
+
+// Some accounts cannot be read from their profile link, because TikTok does not give out the
+// account's hidden ID. Every video of the account carries that ID, so we read it from one video.
+// Resolves with the ID, or null if it could not be read.
+function findAccountId(job, link) {
+  return new Promise((resolve) => {
+    const child = spawn(ytdlp, ['--no-warnings', '--simulate', '--no-playlist', '--print', '%(channel_id)s', '--', link], { windowsHide: true });
+    job.current = child; // so the Stop button can stop it
+    let out = '';
+    child.stdout.setEncoding('utf8');
+    child.stdout.on('data', (chunk) => {
+      out += chunk;
+    });
+    child.on('error', () => resolve(null));
+    child.on('close', () => {
+      const id = out.trim().split(/\r?\n/)[0] ?? '';
+      resolve(/^[\w-]{20,}$/.test(id) ? id : null);
+    });
+  });
 }
 
 function startJob(link, mode, quality, outDir, withCaption) {
@@ -230,8 +262,10 @@ function startJob(link, mode, quality, outDir, withCaption) {
   // "res:720" means: the best quality up to 720p, or the smallest one above it.
   if (quality !== 'best') args.push('-S', `res:${quality}`);
   if (mode === 'one') args.push('--no-playlist');
-  args.push('--', link);
 
+  // Starts yt-dlp on the final link (the original link, or the account found from a video).
+  function begin(finalLink) {
+  args.push('--', finalLink);
   const child = spawn(ytdlp, args, { windowsHide: true });
   job.current = child;
   let errors = '';
@@ -268,6 +302,9 @@ function startJob(link, mode, quality, outDir, withCaption) {
     if (job.files.length === 0) {
       job.status = 'error';
       job.message = errors.trim().split('\n').slice(-3).join(' ') || 'No video was saved.';
+      if (/secondary user ID/i.test(errors)) {
+        job.message = 'TikTok did not give the list of videos for this account. Paste the link of ONE video from this account, then press "Download all videos" again.';
+      }
       return;
     }
     if (withCaption && !ffmpeg) job.notes.push('The caption was not added, because ffmpeg was not found.');
@@ -297,6 +334,25 @@ function startJob(link, mode, quality, outDir, withCaption) {
     job.stage = 'done';
     job.status = 'done';
   });
+  }
+
+  if (mode === 'all' && isVideoLink(link)) {
+    // "Download all videos" with the link of one video: find the account of that video first.
+    job.stage = 'finding';
+    findAccountId(job, link).then((accountId) => {
+      if (job.stopped) {
+        job.status = 'stopped';
+      } else if (!accountId) {
+        job.status = 'error';
+        job.message = 'Could not find the account of this video. Check that the link works and the video is not private.';
+      } else {
+        job.stage = 'downloading';
+        begin(`tiktokuser:${accountId}`);
+      }
+    });
+  } else {
+    begin(link);
+  }
   return job;
 }
 

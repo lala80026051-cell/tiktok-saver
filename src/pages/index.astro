@@ -1,26 +1,129 @@
 ---
-// The homepage: a box where you paste a TikTok link.
+// The homepage: a colorful top band, and a card where you paste a TikTok link.
 import Base from '../layouts/Base.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+
+// The three steps shown under the headline.
+const steps = [
+  { icon: '🔗', en: 'Paste the link', km: 'បិទភ្ជាប់តំណ' },
+  { icon: '🎛️', en: 'Choose your options', km: 'ជ្រើសរើសជម្រើស' },
+  { icon: '⬇️', en: 'Download', km: 'ទាញយក' },
+];
+
+// The four feature cards at the bottom of the page.
+const perks = [
+  {
+    icon: '🎞️',
+    en: 'Best quality',
+    km: 'គុណភាពល្អបំផុត',
+    text: 'You get the biggest size that TikTok has for each video.',
+    textKm: 'អ្នកទទួលបានទំហំធំបំផុតដែល TikTok មានសម្រាប់វីដេអូនីមួយៗ។',
+  },
+  {
+    icon: '💬',
+    en: 'Caption on the video',
+    km: 'caption លើវីដេអូ',
+    text: 'Every video gets its own caption, written at the bottom.',
+    textKm: 'វីដេអូនីមួយៗមាន caption ផ្ទាល់ខ្លួន សរសេរនៅខាងក្រោម។',
+  },
+  {
+    icon: '🔢',
+    en: 'Numbered files',
+    km: 'ឯកសារមានលេខ',
+    text: 'Files are named 001, 002, 003… so they stay in order.',
+    textKm: 'ឯកសារមានឈ្មោះ 001, 002, 003… ដើម្បីឱ្យនៅតាមលំដាប់។',
+  },
+  {
+    icon: '⏹️',
+    en: 'Stop any time',
+    km: 'បញ្ឈប់បានគ្រប់ពេល',
+    text: 'Videos that are already finished stay saved.',
+    textKm: 'វីដេអូដែលបានចប់រួចហើយនៅតែត្រូវបានរក្សាទុក។',
+  },
+];
 ---
 
 <Base>
   <Header />
 
-  <main class="relative overflow-hidden">
-    <div class="pointer-events-none absolute -top-40 -right-40 size-[30rem] rounded-full bg-sun/25 blur-3xl"></div>
-    <div class="pointer-events-none absolute -bottom-40 -left-40 size-[26rem] rounded-full bg-brand/15 blur-3xl"></div>
+  <main>
+    <!-- TOP BAND -->
+    <section class="hero relative overflow-hidden text-white">
+      <div class="pointer-events-none absolute top-10 left-[8%] size-3 rounded-full bg-sun/80 float-slow" aria-hidden="true"></div>
+      <div class="pointer-events-none absolute top-1/2 left-[46%] size-2 rounded-full bg-white/60 float" aria-hidden="true"></div>
+      <div class="pointer-events-none absolute right-[10%] bottom-24 size-4 rounded-full bg-brand/80 float-slow" aria-hidden="true"></div>
 
-    <section class="relative mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24">
-      <h1 class="font-display text-4xl leading-tight font-extrabold tracking-tight text-balance sm:text-6xl">
-        Save your <span class="text-brand">TikTok</span> video.
-      </h1>
-      <p lang="km" class="mt-3 text-xl text-ink/70">រក្សាទុកវីដេអូ TikTok របស់អ្នក</p>
+      <div class="relative mx-auto grid max-w-5xl items-center gap-10 px-4 pt-14 pb-32 sm:px-6 sm:pt-20 lg:grid-cols-[1.25fr_1fr]">
+        <div>
+          <div class="flex flex-wrap gap-2">
+            <span class="chip">🔒 Private</span>
+            <span class="chip">💻 Runs on your computer</span>
+            <span class="chip">🇰🇭 English + ខ្មែរ</span>
+          </div>
 
+          <h1 class="mt-6 font-display text-5xl leading-[1.02] font-extrabold tracking-tight text-balance sm:text-6xl lg:text-7xl">
+            Save your <span class="gradient-text">TikTok</span> videos in seconds.
+          </h1>
+          <p lang="km" class="mt-4 text-xl text-white/80 sm:text-2xl">រក្សាទុកវីដេអូ TikTok របស់អ្នកក្នុងរយៈពេលតែប៉ុន្មានវិនាទី</p>
+          <p class="mt-5 max-w-xl text-lg text-white/75">
+            Paste a link, choose the quality, and your video is saved with its own caption and a number.
+            <span class="km" lang="km">បិទភ្ជាប់តំណ ជ្រើសរើសគុណភាព ហើយវីដេអូរបស់អ្នកត្រូវបានរក្សាទុកជាមួយ caption និងលេខផ្ទាល់ខ្លួន។</span>
+          </p>
+
+          <ol class="mt-8 grid max-w-xl gap-3 sm:grid-cols-3">
+            {
+              steps.map((s, i) => (
+                <li class="chip !items-start !rounded-2xl !p-3">
+                  <span class="text-2xl" aria-hidden="true">{s.icon}</span>
+                  <span class="text-sm leading-snug">
+                    <b class="block text-white/60">0{i + 1}</b>
+                    {s.en}
+                    <span class="km text-xs" lang="km">{s.km}</span>
+                  </span>
+                </li>
+              ))
+            }
+          </ol>
+        </div>
+
+        <!-- An original picture: a phone with a play button and a download arrow. -->
+        <div class="relative mx-auto hidden w-64 lg:block" aria-hidden="true">
+          <div class="float">
+            <svg viewBox="0 0 220 360" class="w-full drop-shadow-[0_30px_40px_rgba(0,0,0,0.45)]" role="img" aria-label="">
+              <defs>
+                <linearGradient id="screen" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#ff8a4c" />
+                  <stop offset="0.55" stop-color="#e2552f" />
+                  <stop offset="1" stop-color="#7a2a6b" />
+                </linearGradient>
+                <linearGradient id="arrow" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#ffd166" />
+                  <stop offset="1" stop-color="#f4b33d" />
+                </linearGradient>
+              </defs>
+              <rect x="10" y="6" width="200" height="348" rx="34" fill="#0f0d1c" />
+              <rect x="20" y="16" width="180" height="328" rx="26" fill="url(#screen)" />
+              <rect x="80" y="22" width="60" height="8" rx="4" fill="#0f0d1c" opacity="0.55" />
+              <circle cx="110" cy="130" r="46" fill="#fff" opacity="0.18" />
+              <path d="M98 106 L98 154 L138 130 Z" fill="#fff" />
+              <rect x="40" y="206" width="140" height="10" rx="5" fill="#fff" opacity="0.35" />
+              <rect x="40" y="226" width="96" height="10" rx="5" fill="#fff" opacity="0.25" />
+              <circle cx="110" cy="296" r="30" fill="url(#arrow)" />
+              <path d="M110 282 L110 304 M100 295 L110 306 L120 295" stroke="#1d1a2e" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+            </svg>
+          </div>
+          <div class="absolute -top-2 -right-6 rotate-6 rounded-2xl bg-white px-3 py-2 text-sm font-bold text-ink shadow-xl float-slow">1080p ✨</div>
+          <div class="absolute bottom-16 -left-10 -rotate-6 rounded-2xl bg-sun px-3 py-2 text-sm font-bold text-ink shadow-xl float">001 ✅</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- THE CARD -->
+    <section class="relative mx-auto -mt-24 max-w-3xl px-4 pb-14 sm:px-6">
       <!-- Shown only on the public website, where downloading cannot work. -->
-      <section id="public-guide" class="mt-10 hidden rounded-2xl border border-ink/10 bg-white p-5 shadow-xl shadow-ink/5 sm:p-8">
-        <h2 class="font-display text-2xl font-extrabold">
+      <section id="public-guide" class="hidden rounded-3xl border border-ink/10 bg-white p-6 shadow-2xl shadow-ink/15 sm:p-9">
+        <h2 class="font-display text-3xl font-extrabold">
           Start here
           <span class="km text-lg" lang="km">ចាប់ផ្តើមនៅទីនេះ</span>
         </h2>
@@ -30,31 +133,28 @@ import Footer from '../components/Footer.astro';
         </p>
         <ol class="mt-6 space-y-4">
           <li class="flex gap-4">
-            <span class="grid size-8 shrink-0 place-items-center rounded-full bg-brand font-display font-bold text-paper">1</span>
+            <span class="step-chip">1</span>
             <p class="pt-1">
               Open the <b>tiktok-saver</b> folder on your computer, and double-click <b>start.bat</b>.
               <span class="km text-muted" lang="km">បើកថត tiktok-saver លើកុំព្យូទ័ររបស់អ្នក ហើយចុចពីរដងលើ start.bat។</span>
             </p>
           </li>
           <li class="flex gap-4">
-            <span class="grid size-8 shrink-0 place-items-center rounded-full bg-brand font-display font-bold text-paper">2</span>
+            <span class="step-chip">2</span>
             <p class="pt-1">
               Your browser opens your own page. Paste the link there.
               <span class="km text-muted" lang="km">browser របស់អ្នកបើកទំព័រផ្ទាល់ខ្លួនរបស់អ្នក។ បិទភ្ជាប់តំណនៅទីនោះ។</span>
             </p>
           </li>
           <li class="flex gap-4">
-            <span class="grid size-8 shrink-0 place-items-center rounded-full bg-brand font-display font-bold text-paper">3</span>
+            <span class="step-chip">3</span>
             <p class="pt-1">
               Press <b>Download 1 video</b>. The video is saved in <b>Downloads\TikTok Saver</b>.
               <span class="km text-muted" lang="km">ចុច Download 1 video។ វីដេអូត្រូវបានរក្សាទុកក្នុង Downloads\TikTok Saver។</span>
             </p>
           </li>
         </ol>
-        <a
-          href="http://localhost:4323/"
-          class="mt-6 inline-block rounded-full bg-brand px-6 py-3 font-semibold text-paper shadow-lg shadow-brand/25 transition hover:bg-brand-dark"
-        >
+        <a href="http://localhost:4323/" class="btn-main mt-7 inline-block rounded-full px-7 py-3 font-semibold text-white">
           Open my page <span lang="km" class="font-khmer font-normal opacity-80">បើកទំព័ររបស់ខ្ញុំ</span>
         </a>
         <p class="mt-3 text-sm text-muted">
@@ -63,13 +163,17 @@ import Footer from '../components/Footer.astro';
         </p>
       </section>
 
-      <p id="banner" role="status" class="mt-8 hidden rounded-xl border border-brand/30 bg-brand/10 p-4"></p>
+      <p id="banner" role="status" class="mb-4 hidden rounded-2xl border border-brand/30 bg-white p-4 shadow-lg"></p>
 
-      <form id="save-form" class="mt-6 rounded-2xl border border-ink/10 bg-white p-5 shadow-xl shadow-ink/5 sm:p-8" novalidate>
-        <label for="link" class="font-display text-lg font-bold">
-          Paste the TikTok link here
-          <span class="km text-base" lang="km">បិទភ្ជាប់តំណ TikTok នៅទីនេះ</span>
-        </label>
+      <form id="save-form" class="rounded-3xl border border-ink/10 bg-white p-6 shadow-2xl shadow-ink/15 sm:p-9" novalidate>
+        <!-- STEP 1 -->
+        <div class="flex items-center gap-3">
+          <span class="step-chip">1</span>
+          <label for="link" class="font-display text-xl font-bold">
+            Paste the TikTok link
+            <span class="km text-base" lang="km">បិទភ្ជាប់តំណ TikTok</span>
+          </label>
+        </div>
         <input
           id="link"
           name="link"
@@ -77,105 +181,155 @@ import Footer from '../components/Footer.astro';
           inputmode="url"
           autocomplete="off"
           placeholder="https://www.tiktok.com/..."
-          class="mt-3 w-full rounded-xl border border-ink/20 bg-paper px-4 py-3 text-base outline-none focus:border-brand"
+          class="mt-4 w-full rounded-2xl border-2 border-ink/15 bg-paper px-5 py-4 text-base outline-none transition focus:border-brand focus:bg-white focus:shadow-[0_0_0_4px_rgb(226_85_47/0.15)]"
         />
-        <p class="mt-5 font-display text-lg font-bold">
-          Save to
-          <span class="km text-base" lang="km">រក្សាទុកទៅ</span>
-        </p>
-        <!-- The folder name has its own full-width row. The two buttons sit in a row below it. -->
-        <p id="folder-path" class="mt-2 w-full rounded-xl border border-ink/20 bg-paper px-4 py-3 text-sm break-words">…</p>
-        <div class="mt-3 flex flex-wrap gap-3">
-          <button
-            id="choose-folder"
-            type="button"
-            class="rounded-full border border-ink/20 bg-white px-5 py-2 font-semibold transition hover:border-ink/50 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Choose folder <span lang="km" class="font-khmer font-normal opacity-70">ជ្រើសរើសថត</span>
-          </button>
-          <button
-            id="open-folder"
-            type="button"
-            class="rounded-full bg-ink px-5 py-2 font-semibold text-paper transition hover:bg-brand disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            📂 Open folder <span lang="km" class="font-khmer font-normal opacity-80">បើកថតមើលវីដេអូ</span>
-          </button>
+
+        <!-- STEP 2 -->
+        <div class="mt-9 flex items-center gap-3">
+          <span class="step-chip">2</span>
+          <p class="font-display text-xl font-bold">
+            Choose your options
+            <span class="km text-base" lang="km">ជ្រើសរើសជម្រើសរបស់អ្នក</span>
+          </p>
         </div>
 
-        <label for="quality" class="mt-5 block font-display text-lg font-bold">
-          Quality
-          <span class="km text-base" lang="km">គុណភាព</span>
-        </label>
-        <select
-          id="quality"
-          class="mt-2 w-full rounded-xl border border-ink/20 bg-paper px-4 py-3 text-base outline-none focus:border-brand"
-        >
-          <option value="best">Best available (recommended)</option>
-          <option value="2160">4K (2160p) - TikTok has no 4K, you get its best</option>
-          <option value="1440">1440p</option>
-          <option value="1080">1080p</option>
-          <option value="720">720p</option>
-          <option value="480">480p</option>
-          <option value="360">360p</option>
-          <option value="240">240p</option>
-          <option value="144">144p</option>
-        </select>
-        <p class="mt-2 text-sm text-muted">
-          TikTok decides which qualities a video has. Most videos are 1080p or lower, and TikTok has no 4K. If the quality you choose is not there, you get the closest one. After the download, the page tells you the quality you really got.
-          <span class="km" lang="km">TikTok កំណត់ថាវីដេអូមានគុណភាពអ្វីខ្លះ។ វីដេអូភាគច្រើនមាន 1080p ឬទាបជាងនេះ ហើយ TikTok គ្មាន 4K ទេ។ បើគុណភាពដែលអ្នកជ្រើសមិនមាន អ្នកនឹងទទួលបានគុណភាពជិតបំផុត។ បន្ទាប់ពីការទាញយក ទំព័រប្រាប់អ្នកពីគុណភាពដែលអ្នកទទួលបានពិតប្រាកដ។</span>
-        </p>
-        <label class="mt-5 flex items-start gap-3">
-          <input id="caption" type="checkbox" checked class="mt-1 size-5 accent-brand" />
+        <div class="mt-4 rounded-2xl border border-ink/10 bg-paper/70 p-4 sm:p-5">
+          <p class="font-display text-base font-bold">
+            📁 Save to
+            <span class="km text-sm" lang="km">រក្សាទុកទៅ</span>
+          </p>
+          <!-- The folder name has its own full-width row. The two buttons sit in a row below it. -->
+          <p id="folder-path" class="mt-2 w-full rounded-xl border border-ink/15 bg-white px-4 py-3 text-sm break-words">…</p>
+          <div class="mt-3 flex flex-wrap gap-3">
+            <button
+              id="choose-folder"
+              type="button"
+              class="rounded-full border-2 border-ink/15 bg-white px-5 py-2 font-semibold transition hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Choose folder <span lang="km" class="font-khmer font-normal opacity-70">ជ្រើសរើសថត</span>
+            </button>
+            <button
+              id="open-folder"
+              type="button"
+              class="rounded-full bg-ink px-5 py-2 font-semibold text-paper transition hover:bg-brand disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              📂 Open folder <span lang="km" class="font-khmer font-normal opacity-80">បើកថតមើលវីដេអូ</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-4 rounded-2xl border border-ink/10 bg-paper/70 p-4 sm:p-5">
+          <label for="quality" class="block font-display text-base font-bold">
+            🎞️ Quality
+            <span class="km text-sm" lang="km">គុណភាព</span>
+          </label>
+          <select
+            id="quality"
+            class="mt-2 w-full rounded-xl border border-ink/15 bg-white px-4 py-3 text-base outline-none focus:border-brand"
+          >
+            <option value="best">Best available (recommended)</option>
+            <option value="2160">4K (2160p) - TikTok has no 4K, you get its best</option>
+            <option value="1440">1440p</option>
+            <option value="1080">1080p</option>
+            <option value="720">720p</option>
+            <option value="480">480p</option>
+            <option value="360">360p</option>
+            <option value="240">240p</option>
+            <option value="144">144p</option>
+          </select>
+          <p class="mt-2 text-sm text-muted">
+            TikTok decides which qualities a video has. Most videos are 1080p or lower, and TikTok has no 4K. If the quality you choose is not there, you get the closest one. After the download, the page tells you the quality you really got.
+            <span class="km" lang="km">TikTok កំណត់ថាវីដេអូមានគុណភាពអ្វីខ្លះ។ វីដេអូភាគច្រើនមាន 1080p ឬទាបជាងនេះ ហើយ TikTok គ្មាន 4K ទេ។ បើគុណភាពដែលអ្នកជ្រើសមិនមាន អ្នកនឹងទទួលបានគុណភាពជិតបំផុត។ បន្ទាប់ពីការទាញយក ទំព័រប្រាប់អ្នកពីគុណភាពដែលអ្នកទទួលបានពិតប្រាកដ។</span>
+          </p>
+        </div>
+
+        <label class="mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border border-ink/10 bg-paper/70 p-4 sm:p-5">
+          <input id="caption" type="checkbox" checked class="mt-1 size-5 shrink-0 accent-brand" />
           <span>
-            <span class="font-display text-lg font-bold">Put the caption on the video</span>
-            <span class="km font-display text-base font-bold" lang="km">ដាក់ caption លើវីដេអូ</span>
+            <span class="font-display text-base font-bold">💬 Put the caption on the video</span>
+            <span class="km font-display text-sm font-bold" lang="km">ដាក់ caption លើវីដេអូ</span>
             <span class="mt-1 block text-sm text-muted">
               The caption is written at the bottom of the picture. This takes extra time, and the picture is processed again.
               <span class="km" lang="km">caption ត្រូវបានសរសេរនៅខាងក្រោមរូបភាព។ វាចំណាយពេលបន្ថែម ហើយរូបភាពត្រូវបានដំណើរការម្តងទៀត។</span>
             </span>
           </span>
         </label>
+
+        <!-- STEP 3 -->
+        <div class="mt-9 flex items-center gap-3">
+          <span class="step-chip">3</span>
+          <p class="font-display text-xl font-bold">
+            Download
+            <span class="km text-base" lang="km">ទាញយក</span>
+          </p>
+        </div>
         <div class="mt-4 flex flex-col gap-3 sm:flex-row">
           <button
             type="button"
             data-mode="one"
-            class="mode-button rounded-full bg-brand px-6 py-3 font-semibold text-paper shadow-lg shadow-brand/25 transition hover:bg-brand-dark"
+            class="mode-button btn-main flex-1 rounded-full px-6 py-4 text-lg font-bold text-white"
           >
-            Download 1 video <span lang="km" class="font-khmer font-normal opacity-80">ទាញយក ១ វីដេអូ</span>
+            ⬇️ Download 1 video <span lang="km" class="font-khmer text-base font-normal opacity-85">ទាញយក ១ វីដេអូ</span>
           </button>
           <button
             type="button"
             data-mode="all"
-            class="mode-button rounded-full border border-ink/20 bg-white px-6 py-3 font-semibold transition hover:border-ink/50"
+            class="mode-button flex-1 rounded-full border-2 border-ink/20 bg-white px-6 py-4 text-lg font-bold transition hover:-translate-y-0.5 hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Download all videos <span lang="km" class="font-khmer font-normal opacity-70">ទាញយកវីដេអូទាំងអស់</span>
-          </button>
-          <button
-            id="stop"
-            type="button"
-            disabled
-            class="rounded-full bg-red-600 px-6 py-3 font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-ink/20 disabled:text-ink/40"
-          >
-            ⏹ Stop download <span lang="km" class="font-khmer font-normal opacity-80">បញ្ឈប់ការទាញយក</span>
+            📚 Download all videos <span lang="km" class="font-khmer text-base font-normal opacity-70">ទាញយកវីដេអូទាំងអស់</span>
           </button>
         </div>
-        <ul class="mt-4 space-y-2 text-sm text-muted">
+        <button
+          id="stop"
+          type="button"
+          disabled
+          class="mt-3 w-full rounded-full bg-red-600 px-6 py-3 font-semibold text-white shadow-lg shadow-red-600/25 transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-ink/10 disabled:text-ink/40 disabled:shadow-none"
+        >
+          ⏹ Stop download <span lang="km" class="font-khmer font-normal opacity-80">បញ្ឈប់ការទាញយក</span>
+        </button>
+
+        <ul class="mt-5 space-y-2 text-sm text-muted">
           <li>
-            <b>1 video:</b> copy the link of the video.
+            <b class="text-ink">1 video:</b> copy the link of the video.
             <span class="km" lang="km">១ វីដេអូ៖ ចម្លងតំណរបស់វីដេអូ។</span>
           </li>
           <li>
-            <b>All videos:</b> copy the link of the profile (account) or of a video.
+            <b class="text-ink">All videos:</b> copy the link of the profile (account) or of a video.
             <span class="km" lang="km">វីដេអូទាំងអស់៖ ចម្លងតំណរបស់ប្រូហ្វាល់ (គណនី) ឬតំណរបស់វីដេអូ។</span>
           </li>
         </ul>
-        <p id="message" role="status" class="mt-4 hidden rounded-xl bg-paper p-4"></p>
+        <p id="message" role="status" class="msg msg-info mt-5 hidden"></p>
       </form>
 
-      <p class="mt-6 text-sm text-muted">
-        Only save your own videos, or videos where the owner says OK. This also applies to "all videos" of a profile.
+      <p class="mt-6 rounded-2xl bg-sun/15 px-4 py-3 text-sm text-ink/80">
+        🙏 Only save your own videos, or videos where the owner says OK. This also applies to "all videos" of a profile.
         <span class="km" lang="km">រក្សាទុកតែវីដេអូរបស់អ្នកផ្ទាល់ ឬវីដេអូដែលម្ចាស់អនុញ្ញាត។ នេះក៏ត្រូវប្រើជាមួយ "វីដេអូទាំងអស់" របស់ប្រូហ្វាល់ដែរ។</span>
       </p>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="mx-auto max-w-5xl px-4 pb-20 sm:px-6">
+      <h2 class="text-center font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
+        Made to be simple
+        <span class="km" lang="km">បង្កើតឡើងដើម្បីឱ្យសាមញ្ញ</span>
+      </h2>
+      <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {
+          perks.map((p) => (
+            <article class="lift rounded-3xl border border-ink/10 bg-white p-6">
+              <span class="grid size-12 place-items-center rounded-2xl bg-sun/25 text-2xl" aria-hidden="true">{p.icon}</span>
+              <h3 class="mt-4 font-display text-lg font-bold">
+                {p.en}
+                <span class="km" lang="km">{p.km}</span>
+              </h3>
+              <p class="mt-2 text-sm text-muted">
+                {p.text}
+                <span class="km" lang="km">{p.textKm}</span>
+              </p>
+            </article>
+          ))
+        }
+      </div>
     </section>
   </main>
 
@@ -188,6 +342,15 @@ import Footer from '../components/Footer.astro';
   const message = document.querySelector<HTMLElement>('#message')!;
 
   function show(en: string, km: string) {
+    // The box color follows the kind of message: done (green), problem (red), or working (orange).
+    const kind = en.startsWith('✅')
+      ? 'msg-success'
+      : /^(Could not|The helper|Lost contact|That is not|This is a profile|TikTok did not|You are on)/.test(en)
+        ? 'msg-error'
+        : /^(Stopped|A window opened)/.test(en)
+          ? 'msg-info'
+          : 'msg-working';
+    message.className = `msg ${kind} mt-5`;
     message.innerHTML = '';
     message.append(en);
     const span = document.createElement('span');
@@ -289,7 +452,9 @@ import Footer from '../components/Footer.astro';
       while (true) {
         await new Promise((resolve) => setTimeout(resolve, 1500));
         const info = await (await fetch(`${HELPER}/status/${id}`)).json();
-        if (info.status === 'running' && info.stage === 'captioning') {
+        if (info.status === 'running' && info.stage === 'finding') {
+          show('Finding the account of this video…', 'កំពុងរកគណនីរបស់វីដេអូនេះ…');
+        } else if (info.status === 'running' && info.stage === 'captioning') {
           show(`Writing the caption on the video… ${info.captioned} of ${info.count}`, `កំពុងសរសេរ caption លើវីដេអូ… ${info.captioned} ក្នុងចំណោម ${info.count}`);
         } else if (info.status === 'running') {
           show(`Saved ${info.count} video(s) so far…`, `បានរក្សាទុក ${info.count} វីដេអូរហូតមកដល់ឥឡូវ…`);
