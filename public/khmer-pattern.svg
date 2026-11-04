@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72">
+  <!-- An original diamond lattice in the spirit of Khmer ornament. One tile; it repeats. -->
+  <g fill="none" stroke="#e0a93b" stroke-width="1.2" opacity="0.32">
+    <path d="M36 4 L68 36 L36 68 L4 36 Z" />
+    <path d="M36 17 L55 36 L36 55 L17 36 Z" />
+    <path d="M36 28 L44 36 L36 44 L28 36 Z" />
+  </g>
+  <g fill="#e0a93b" opacity="0.4">
+    <circle cx="36" cy="36" r="2.2" />
+    <circle cx="0" cy="0" r="2" />
+    <circle cx="72" cy="0" r="2" />
+    <circle cx="0" cy="72" r="2" />
+    <circle cx="72" cy="72" r="2" />
+  </g>
+</svg>

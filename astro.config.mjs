@@ -14,6 +14,9 @@ export default defineConfig({
         '/helper': {
           target: 'http://127.0.0.1:4330',
           rewrite: (path) => path.replace(/^\/helper/, ''),
+          // Tells the helper the real address of the device that asked (it is added at the END of
+          // the X-Forwarded-For header). The helper uses it to ask other devices for the code.
+          xfwd: true,
         },
       },
     },

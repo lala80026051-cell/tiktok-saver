@@ -4,7 +4,7 @@
 // Start it with:  npm run helper
 import http from 'node:http';
 import { spawn, spawnSync } from 'node:child_process';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, timingSafeEqual } from 'node:crypto';
 import os from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs';
@@ -60,15 +60,75 @@ function chooseFolder(startFolder) {
 // first, so a request that has it comes from our own page.
 const requiredHeader = 'x-tiktok-saver';
 
-// Only real TikTok links are accepted.
-function isTikTok(text) {
+// ---- Using the page from another device (a phone, or another computer) ----
+// The helper itself only listens on THIS computer (127.0.0.1). A device on the same network opens
+// the website, and the website's server passes the device's requests on to the helper. That server
+// adds the device's real address at the END of the X-Forwarded-For header. So:
+//   - a request with no such address comes from this computer: always allowed;
+//   - a request from another device is allowed only with the code (PIN) shown on this computer;
+//   - if the helper was started without a code, requests from other devices are refused.
+const savedPin = process.env.SAVER_PIN ?? '';
+const failures = new Map(); // device address -> { count, until }
+
+function clientAddress(req) {
+  const parts = String(req.headers['x-forwarded-for'] ?? '').split(',').map((part) => part.trim()).filter(Boolean);
+  return parts.length ? parts[parts.length - 1] : '';
+}
+
+function isLocal(req) {
+  return ['', '127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(clientAddress(req));
+}
+
+function pinMatches(req) {
+  const given = Buffer.from(String(req.headers['x-saver-pin'] ?? ''));
+  const wanted = Buffer.from(savedPin);
+  return given.length === wanted.length && timingSafeEqual(given, wanted);
+}
+
+// Returns 'ok', 'pin' (a code is needed), 'locked' (too many wrong codes), or 'closed' (no code was set).
+function accessFor(req) {
+  if (isLocal(req)) return 'ok';
+  if (!savedPin) return 'closed';
+  const address = clientAddress(req);
+  const record = failures.get(address) ?? { count: 0, until: 0 };
+  if (record.until > Date.now()) return 'locked';
+  if (pinMatches(req)) {
+    failures.delete(address);
+    return 'ok';
+  }
+  if (req.headers['x-saver-pin']) {
+    // A wrong code. After 5 wrong codes, this device is locked out for 10 minutes.
+    record.count += 1;
+    if (record.count >= 5) {
+      record.count = 0;
+      record.until = Date.now() + 10 * 60 * 1000;
+    }
+    failures.set(address, record);
+  }
+  return 'pin';
+}
+
+// The video sites this tool accepts. The site is found from the link itself.
+const platformHosts = {
+  tiktok: ['tiktok.com'],
+  youtube: ['youtube.com', 'youtu.be', 'youtube-nocookie.com'],
+  facebook: ['facebook.com', 'fb.watch', 'fb.com'],
+  instagram: ['instagram.com'],
+};
+
+// Returns 'tiktok', 'youtube', 'facebook' or 'instagram' for a link, or null for anything else.
+function platformOf(text) {
   try {
     const url = new URL(text);
-    const host = url.hostname;
-    return (url.protocol === 'https:' || url.protocol === 'http:') && (host === 'tiktok.com' || host.endsWith('.tiktok.com'));
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') return null;
+    const host = url.hostname.toLowerCase();
+    for (const [name, domains] of Object.entries(platformHosts)) {
+      if (domains.some((domain) => host === domain || host.endsWith(`.${domain}`))) return name;
+    }
   } catch {
-    return false;
+    // Not a link at all.
   }
+  return null;
 }
 
 const jobs = new Map();
@@ -244,6 +304,7 @@ function findAccountId(job, link) {
 function startJob(link, mode, quality, outDir, withCaption) {
   const job = { id: randomUUID(), status: 'running', stage: 'downloading', stopped: false, current: null, files: [], captioned: 0, notes: [], message: '', folder: outDir };
   const startedAt = Date.now();
+  const platform = platformOf(link);
   jobs.set(job.id, job);
 
   const name = '%(autonumber)03d - %(title,id).80B';
@@ -258,7 +319,10 @@ function startJob(link, mode, quality, outDir, withCaption) {
     '--autonumber-start', String(nextNumber(outDir)),
     '--windows-filenames',
     '--ignore-errors',
+    // YouTube keeps picture and sound apart for big sizes, so they are joined into one mp4.
+    '--merge-output-format', 'mp4',
   ];
+  if (ffmpeg) args.push('--ffmpeg-location', path.dirname(ffmpeg));
   // "res:720" means: the best quality up to 720p, or the smallest one above it.
   if (quality !== 'best') args.push('-S', `res:${quality}`);
   if (mode === 'one') args.push('--no-playlist');
@@ -304,6 +368,8 @@ function startJob(link, mode, quality, outDir, withCaption) {
       job.message = errors.trim().split('\n').slice(-3).join(' ') || 'No video was saved.';
       if (/secondary user ID/i.test(errors)) {
         job.message = 'TikTok did not give the list of videos for this account. Paste the link of ONE video from this account, then press "Download all videos" again.';
+      } else if (platform !== 'tiktok' && /log ?in|sign in|cookies|rate-limit|private|not available/i.test(errors)) {
+        job.message += ' This site may need you to log in for this video, and this tool cannot log in.';
       }
       return;
     }
@@ -313,7 +379,8 @@ function startJob(link, mode, quality, outDir, withCaption) {
       // Each video gets its own caption, taken from that same video.
       for (const item of job.files) {
         if (job.stopped) break;
-        const text = String(item.description || item.title || '').trim();
+        // YouTube descriptions are very long, so for YouTube the caption is the title.
+        const text = String((platform === 'youtube' ? item.title : item.description || item.title) || '').trim();
         if (!text) {
           job.captioned += 1;
           continue;
@@ -336,7 +403,7 @@ function startJob(link, mode, quality, outDir, withCaption) {
   });
   }
 
-  if (mode === 'all' && isVideoLink(link)) {
+  if (mode === 'all' && platform === 'tiktok' && isVideoLink(link)) {
     // "Download all videos" with the link of one video: find the account of that video first.
     job.stage = 'finding';
     findAccountId(job, link).then((accountId) => {
@@ -364,12 +431,47 @@ function send(res, code, body) {
 const server = http.createServer((req, res) => {
   if (req.method === 'OPTIONS') return send(res, 204, {});
 
-  // The page asks this when it opens, to know the helper is ready.
-  if (req.method === 'GET' && req.url === '/ping') return send(res, 200, { ok: true, folder: defaultDir });
+  // A finished video, for a phone or another computer to save. The link holds the secret id of the
+  // download (128 random bits), so it needs no code, and only finished videos can be fetched.
+  const fileMatch = req.method === 'GET' && req.url?.match(/^\/file\/([0-9a-f-]{36})\/(\d+)$/);
+  if (fileMatch) {
+    const job = jobs.get(fileMatch[1]);
+    const item = job?.status === 'done' ? job.files[Number(fileMatch[2])] : undefined;
+    try {
+      if (!item) throw new Error('no such video');
+      const size = fs.statSync(item.filepath).size;
+      const name = path.basename(item.filepath);
+      res.writeHead(200, {
+        'Content-Type': 'video/mp4',
+        'Content-Length': size,
+        'Content-Disposition': `attachment; filename="video-${Number(fileMatch[2]) + 1}.mp4"; filename*=UTF-8''${encodeURIComponent(name)}`,
+      });
+      return fs.createReadStream(item.filepath).pipe(res);
+    } catch {
+      return send(res, 404, { error: 'Video not found' });
+    }
+  }
+
+  // Everything below needs to know who is asking: this computer, or another device with the code.
+  const access = accessFor(req);
+  const local = isLocal(req);
+
+  // The page asks this when it opens, to know the helper is ready (and whether a code is needed).
+  if (req.method === 'GET' && req.url === '/ping') {
+    if (access === 'closed') return send(res, 403, { closed: true });
+    if (access === 'locked') return send(res, 429, { locked: true });
+    if (access === 'pin') return send(res, 401, { pin: true });
+    return send(res, 200, { ok: true, folder: local ? defaultDir : '', remote: !local });
+  }
+  if (access === 'closed') return send(res, 403, { error: 'Not allowed' });
+  if (access === 'locked') return send(res, 429, { error: 'Too many wrong codes. Try again in 10 minutes.' });
+  if (access === 'pin') return send(res, 401, { error: 'A code is needed' });
 
   // The three requests below change things, so they need the special header.
   if (req.method === 'POST' && ['/download', '/open-folder', '/choose-folder', '/stop'].includes(req.url ?? '')) {
     if (req.headers[requiredHeader] !== '1') return send(res, 403, { error: 'Not allowed' });
+    // Other devices cannot open windows on this computer.
+    if (!local && (req.url === '/open-folder' || req.url === '/choose-folder')) return send(res, 403, { error: 'Only this computer can do that' });
     let body = '';
     req.on('data', (chunk) => {
       body += chunk;
@@ -403,9 +505,10 @@ const server = http.createServer((req, res) => {
         return send(res, 200, { folder: picked });
       }
 
-      if (typeof data.link !== 'string' || !isTikTok(data.link.trim())) return send(res, 400, { error: 'Not a TikTok link' });
+      if (typeof data.link !== 'string' || !platformOf(data.link.trim())) return send(res, 400, { error: 'Not a supported link' });
       const quality = qualities.includes(String(data.quality)) ? String(data.quality) : 'best';
-      const job = startJob(data.link.trim(), data.mode === 'all' ? 'all' : 'one', quality, resolveFolder(data.folder), data.caption !== false);
+      // Another device cannot choose a folder: its videos go to the default folder of this computer.
+      const job = startJob(data.link.trim(), data.mode === 'all' ? 'all' : 'one', quality, local ? resolveFolder(data.folder) : defaultDir, data.caption !== false);
       send(res, 200, { id: job.id });
     });
     return;
@@ -432,7 +535,9 @@ const server = http.createServer((req, res) => {
       heights,
       notes: job.notes,
       message: job.message,
-      folder: job.folder,
+      folder: local ? job.folder : '',
+      // The finished videos, so that a phone or another computer can save them itself.
+      files: job.status === 'done' ? job.files.map((item, index) => ({ index, name: path.basename(item.filepath) })) : [],
     });
   }
 

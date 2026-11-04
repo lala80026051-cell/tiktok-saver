@@ -4,24 +4,36 @@
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/bricolage-grotesque";
 @import "@fontsource-variable/kantumruy-pro";
+/* Moul is a classic Khmer title font. It is used only for Khmer headlines. */
+@import "@fontsource/moul/khmer-400.css";
 
 /*
   BRAND SETTINGS — change these to restyle the whole site.
   Every color class like `bg-brand` or `text-ink` comes from here.
+  The look is Khmer: gold ornament on deep red, on warm ivory paper.
 */
 @theme {
-  --color-ink: #1d1a2e;        /* main text */
-  --color-paper: #fbf7f0;      /* page background */
-  --color-brand: #e2552f;      /* main accent (buttons, highlights) */
-  --color-brand-dark: #b83d1c;
-  --color-sun: #f4b33d;        /* second accent */
-  --color-leaf: #2f7d63;       /* third accent */
-  --color-muted: #6b6578;      /* quieter text */
+  --color-ink: #2a0c10;         /* main text: a very dark red-brown */
+  --color-paper: #f7eed9;       /* page background: warm ivory */
+  --color-brand: #9b1c2c;       /* main accent: deep Khmer red */
+  --color-brand-dark: #6f1220;
+  --color-sun: #e0a93b;         /* gold */
+  --color-leaf: #1f5f4a;        /* jade green */
+  --color-muted: #6b5a55;       /* quieter text */
+
+  --color-maroon: #3a0b12;      /* dark band color */
+  --color-maroon-deep: #25070c;
+  --color-gold: #e0a93b;
+  --color-gold-light: #f6dd91;
+  --color-gold-dark: #a8741f;
+  --color-ivory: #fff8e8;
+  --color-navy: #0e1d46;
 
   /* Khmer is listed in every font stack so Khmer text always renders well. */
   --font-sans: "Inter Variable", "Kantumruy Pro Variable", system-ui, sans-serif;
   --font-display: "Bricolage Grotesque Variable", "Kantumruy Pro Variable", system-ui, sans-serif;
   --font-khmer: "Kantumruy Pro Variable", system-ui, sans-serif;
+  --font-moul: "Moul", "Kantumruy Pro Variable", serif;
 }
 
 html {
@@ -57,31 +69,45 @@ html {
   :is(h2, h3) > .km { margin-top: 0.3em; font-size: 0.6em; font-weight: 600; letter-spacing: 0; }
   h1 > .km { margin-top: 0.3em; font-size: 0.5em; font-weight: 600; letter-spacing: 0; }
 
-  /* ---- Look of the TikTok Saver page ---- */
+  /* ---- Khmer look of the TikTok Saver page ---- */
 
-  /* The big colorful band at the top of the page. */
-  .hero {
+  /* The big dark-red band at the top, with a gold lattice and a warm glow. */
+  .khmer-hero {
     background:
-      radial-gradient(48rem 26rem at 88% -8%, rgb(244 179 61 / 0.5), transparent 62%),
-      radial-gradient(36rem 26rem at -8% 108%, rgb(226 85 47 / 0.5), transparent 62%),
-      linear-gradient(135deg, #1d1a2e 0%, #2b1b45 55%, #4a1f3d 100%);
+      radial-gradient(44rem 22rem at 50% -8%, rgb(224 169 59 / 0.38), transparent 66%),
+      url("/khmer-pattern.svg"),
+      linear-gradient(180deg, #4a0f18 0%, #2f090f 70%, #25070c 100%);
+    background-size: auto, 72px 72px, auto;
+    background-position: center top, center top, center;
   }
 
-  /* Headline words with a warm gradient inside the letters. */
-  .gradient-text {
-    background: linear-gradient(90deg, #ffd166, #ff8a4c 55%, #ff4d6d);
+  /* A gold strip under the top band, made of the same lattice. */
+  .gold-strip {
+    height: 14px;
+    background:
+      linear-gradient(90deg, transparent, rgb(255 255 255 / 0.35), transparent) 0 0 / 200% 100%,
+      repeating-linear-gradient(45deg, #a8741f 0 7px, #f6dd91 7px 14px);
+    border-top: 2px solid #e0a93b;
+    border-bottom: 2px solid #a8741f;
+  }
+
+  /* Words with a gold gradient inside the letters. */
+  .gold-text {
+    background: linear-gradient(180deg, #fff1b8 0%, #f0c35a 45%, #c8922f 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+    filter: drop-shadow(0 2px 0 rgb(37 7 12 / 0.55));
   }
 
-  /* Small rounded labels ("Private", "Free"...) on the dark band. */
+  /* Small gold-edged labels on the dark band. */
   .chip {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    border: 1px solid rgb(255 255 255 / 0.2);
-    background: rgb(255 255 255 / 0.1);
+    border: 1px solid rgb(224 169 59 / 0.55);
+    background: rgb(37 7 12 / 0.45);
+    color: #f6dd91;
     border-radius: 999px;
     padding: 0.3rem 0.8rem;
     font-size: 0.85rem;
@@ -89,33 +115,64 @@ html {
     backdrop-filter: blur(6px);
   }
 
-  /* The number bubble in front of each step title. */
+  /* The ivory card with a double gold border, like a framed Khmer page. */
+  .card-khmer {
+    position: relative;
+    background: #fff8e8;
+    border: 2px solid #c8922f;
+    border-radius: 1.25rem;
+    box-shadow:
+      inset 0 0 0 6px #fff8e8,
+      inset 0 0 0 7px rgb(200 146 47 / 0.65),
+      0 34px 60px -30px rgb(37 7 12 / 0.65);
+  }
+
+  /* The gold corner ornaments sit in the four corners of a card. */
+  .corner { position: absolute; width: 3.1rem; height: 3.1rem; color: #c8922f; pointer-events: none; }
+  .corner-tl { top: 0.35rem; left: 0.35rem; }
+  .corner-tr { top: 0.35rem; right: 0.35rem; transform: scaleX(-1); }
+  .corner-bl { bottom: 0.35rem; left: 0.35rem; transform: scaleY(-1); }
+  .corner-br { bottom: 0.35rem; right: 0.35rem; transform: scale(-1, -1); }
+
+  /* The number in front of each step title: a gold diamond. */
   .step-chip {
     display: grid;
     place-items: center;
     flex: none;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 999px;
-    background: linear-gradient(135deg, #f4b33d, #e2552f);
-    color: #fff;
+    width: 2.6rem;
+    height: 2.6rem;
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    background: linear-gradient(135deg, #fff1b8, #e0a93b 55%, #a8741f);
+    color: #3a0b12;
     font-weight: 800;
-    box-shadow: 0 6px 14px -4px rgb(226 85 47 / 0.6);
+    font-size: 1.05rem;
+    padding-bottom: 0.05rem;
   }
 
-  /* The main orange button. */
+  /* The main button: deep red with a gold edge. */
   .btn-main {
-    background: linear-gradient(135deg, #f0683a, #e2552f 55%, #c9402a);
-    box-shadow: 0 12px 24px -10px rgb(226 85 47 / 0.8);
+    background: linear-gradient(180deg, #b3263a 0%, #8a1626 60%, #6f1220 100%);
+    border: 2px solid #e0a93b;
+    color: #fff3cf;
+    box-shadow: 0 12px 24px -10px rgb(111 18 32 / 0.9), inset 0 1px 0 rgb(255 255 255 / 0.25);
     transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
   }
-  .btn-main:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.05); }
+  .btn-main:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.1); }
   .btn-main:active:not(:disabled) { transform: translateY(0); }
   .btn-main:disabled { filter: grayscale(0.7); box-shadow: none; }
 
+  /* The second button: ivory with a gold edge. */
+  .btn-alt {
+    background: #fff8e8;
+    border: 2px solid #c8922f;
+    color: #6f1220;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  .btn-alt:hover:not(:disabled) { transform: translateY(-2px); background: #fff1c8; }
+
   /* Boxes and buttons show a clear ring when you move with the keyboard. */
   :is(a, button, input, select, textarea):focus-visible {
-    outline: 3px solid #f4b33d;
+    outline: 3px solid #e0a93b;
     outline-offset: 2px;
   }
 
@@ -127,10 +184,10 @@ html {
     line-height: 1.55;
     word-break: break-word;
   }
-  .msg-working { background: #fff6e3; border-color: rgb(244 179 61 / 0.55); }
-  .msg-success { background: #e7f6ee; border-color: rgb(47 125 99 / 0.45); }
-  .msg-error { background: #fdecea; border-color: rgb(226 85 47 / 0.5); }
-  .msg-info { background: #f1eefb; border-color: rgb(29 26 46 / 0.15); }
+  .msg-working { background: #fff3d1; border-color: rgb(200 146 47 / 0.7); }
+  .msg-success { background: #e4f3ea; border-color: rgb(31 95 74 / 0.5); }
+  .msg-error { background: #fbe4e4; border-color: rgb(155 28 44 / 0.5); }
+  .msg-info { background: #efe9f7; border-color: rgb(42 12 16 / 0.15); }
   .msg-working::before {
     content: "";
     display: inline-block;
@@ -138,30 +195,41 @@ html {
     height: 0.95em;
     margin-right: 0.55em;
     vertical-align: -0.1em;
-    border: 2px solid rgb(226 85 47 / 0.3);
-    border-top-color: #e2552f;
+    border: 2px solid rgb(155 28 44 / 0.25);
+    border-top-color: #9b1c2c;
     border-radius: 999px;
     animation: spin 0.8s linear infinite;
   }
 
-  /* Gentle floating motion for the picture on the top band. */
+  /* Gentle floating motion for the emblem. */
   .float { animation: float 6s ease-in-out infinite; }
   .float-slow { animation: float 8s ease-in-out infinite reverse; }
 
   /* Cards that lift a little when you point at them. */
   .lift { transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
-  .lift:hover { transform: translateY(-4px); box-shadow: 0 18px 34px -18px rgb(29 26 46 / 0.35); border-color: rgb(226 85 47 / 0.5); }
+  .lift:hover { transform: translateY(-4px); box-shadow: 0 18px 34px -18px rgb(37 7 12 / 0.5); border-color: #a8741f; }
+}
+
+/*
+  Khmer title letters (Moul). Put class "font-moul" on a Khmer headline.
+  This sits OUTSIDE the components layer on purpose: the general ":lang(km)" rule above is also
+  outside it, and a rule inside a layer would lose to it.
+*/
+.font-moul,
+.font-moul:lang(km) {
+  font-family: var(--font-moul);
+  font-weight: 400;
+  line-height: 1.9;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  50% { transform: translateY(-8px); }
 }
 
 /* People who turn off animation in their system get a still page. */
 @media (prefers-reduced-motion: reduce) {
   .float, .float-slow, .msg-working::before { animation: none; }
-  .lift, .btn-main { transition: none; }
+  .lift, .btn-main, .btn-alt { transition: none; }
 }
-
