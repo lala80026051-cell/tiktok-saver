@@ -54,6 +54,7 @@ Write-Host '  3. download two free helper programs into the "tools" folder of th
 Write-Host '       - yt-dlp.exe   about 22 MB   from https://github.com/yt-dlp/yt-dlp'
 Write-Host '       - ffmpeg       about 193 MB  from https://github.com/yt-dlp/FFmpeg-Builds'
 Write-Host '     (ffmpeg is skipped if this computer already has it.)'
+Write-Host '  4. put a "TikTok Saver" icon on your Desktop, so you can open the app with a double-click.'
 Write-Host 'Each download is checked against the official checksum.'
 Write-Host ''
 $answer = Read-Host 'Type Y and press Enter to continue. Anything else stops, and nothing is downloaded'
@@ -142,7 +143,22 @@ if ($ff) {
   } catch { Write-Host '   ffmpeg did not start. Videos will be saved, but without captions.' -ForegroundColor Yellow }
 }
 
+# ---- The Desktop icon ----
+Step 'Putting a TikTok Saver icon on your Desktop'
+$iconMade = $false
+try {
+  & (Join-Path $root 'make-shortcut.ps1')
+  $iconMade = $true
+} catch {
+  Write-Host "   The icon could not be made ($($_.Exception.Message)). You can still double-click start.bat." -ForegroundColor Yellow
+}
+
 Write-Host ''
 Write-Host '====================  All done!  ====================' -ForegroundColor Green
-Write-Host 'Now double-click  start.bat  to open TikTok Saver.'
+if ($iconMade) {
+  Write-Host 'Now double-click the  TikTok Saver  icon on your Desktop to open the app.'
+  Write-Host '(If you move this folder, run setup.bat again to make a new icon.)'
+} else {
+  Write-Host 'Now double-click  start.bat  to open TikTok Saver.'
+}
 Write-Host ''

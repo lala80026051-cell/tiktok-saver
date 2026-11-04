@@ -39,22 +39,28 @@ Node.js ឥតគិតថ្លៃ។ ចូលទៅ <https://nodejs.org> ហ�
 It asks you first. Then it:
 - installs the website parts,
 - downloads **yt-dlp** (about 22 MB) and **ffmpeg** (about 193 MB) from their official GitHub pages,
-- **checks each file** against the official checksum, and deletes it if it does not match.
+- **checks each file** against the official checksum, and deletes it if it does not match,
+- puts a **TikTok Saver icon on your Desktop**, so you can open the app with a double-click.
 
 វាសួរអ្នកជាមុន។ បន្ទាប់មកវា៖
 - ដំឡើងផ្នែកនៃគេហទំព័រ
 - ទាញយក **yt-dlp** (ប្រហែល 22 MB) និង **ffmpeg** (ប្រហែល 193 MB) ពីទំព័រ GitHub ផ្លូវការរបស់ពួកវា
-- **ពិនិត្យឯកសារនីមួយៗ** ជាមួយលេខត្រួតពិនិត្យផ្លូវការ ហើយលុបវា បើវាមិនត្រូវគ្នា។
+- **ពិនិត្យឯកសារនីមួយៗ** ជាមួយលេខត្រួតពិនិត្យផ្លូវការ ហើយលុបវា បើវាមិនត្រូវគ្នា
+- ដាក់ **រូបតំណាង TikTok Saver លើ Desktop** របស់អ្នក ដើម្បីឱ្យអ្នកបើកកម្មវិធីបានដោយចុចពីរដង។
 
 > If you see "running scripts is disabled", do not worry: `setup.bat` handles that for its own run only.
 > It does not change any setting of your computer.
 
-### 4. Double-click `start.bat` · ចុចពីរដងលើ `start.bat`
+### 4. Double-click the **TikTok Saver** icon on your Desktop · ចុចពីរដងលើរូបតំណាង **TikTok Saver** លើ Desktop
+(Or double-click `start.bat` in the folder. It does the same.)
 Two black windows open, and then your browser opens your own page (`http://localhost:4323`).
 Keep the black windows open while you use the page.
+If you move the folder, run `setup.bat` again to make a new icon.
 
+(ឬចុចពីរដងលើ `start.bat` ក្នុងថត។ វាធ្វើដូចគ្នា។)
 បង្អួចខ្មៅពីរបើក ហើយបន្ទាប់មក browser របស់អ្នកបើកទំព័រផ្ទាល់ខ្លួន (`http://localhost:4323`)។
 ទុកបង្អួចខ្មៅបើក ខណៈពេលអ្នកប្រើទំព័រ។
+បើអ្នកផ្លាស់ទីថត សូមរត់ `setup.bat` ម្តងទៀតដើម្បីបង្កើតរូបតំណាងថ្មី។
 
 ---
 

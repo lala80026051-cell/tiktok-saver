@@ -1,0 +1,87 @@
+---
+// The Start here guide: how to get the app and run it on your own Windows computer.
+// It is used on the home page (hidden, and shown only on the public website) and on the /start page.
+const { id, class: className } = Astro.props;
+---
+
+<!-- Shown only on the public website, where downloading cannot work. -->
+      <section id={id} class:list={['card-khmer p-7 sm:p-10', className]}>
+        <svg class="corner corner-tl" aria-hidden="true"><use href="#k-corner"></use></svg>
+        <svg class="corner corner-tr" aria-hidden="true"><use href="#k-corner"></use></svg>
+        <svg class="corner corner-bl" aria-hidden="true"><use href="#k-corner"></use></svg>
+        <svg class="corner corner-br" aria-hidden="true"><use href="#k-corner"></use></svg>
+        <h2 class="font-display text-3xl font-extrabold text-brand-dark">
+          Start here
+          <span class="km font-moul text-base" lang="km">ចាប់ផ្តើមនៅទីនេះ</span>
+        </h2>
+        <p class="mt-3 text-muted">
+          To save videos, you need the app on your own Windows computer. A website on the internet cannot do it. The app is free, and everyone can get it.
+          <span class="km" lang="km">ដើម្បីរក្សាទុកវីដេអូ អ្នកត្រូវការកម្មវិធីលើកុំព្យូទ័រ Windows របស់អ្នកផ្ទាល់។ គេហទំព័រលើអ៊ីនធឺណិតមិនអាចធ្វើបានទេ។ កម្មវិធីឥតគិតថ្លៃ ហើយអ្នកគ្រប់គ្នាអាចទទួលបាន។</span>
+        </p>
+        <!-- The how-to video (silent, with English and Khmer captions). On wide screens it sits in the
+             free space to the right of the card and stays in view while you scroll. On smaller screens
+             it is inside the card, above the steps. It does not start by itself, to save mobile data. -->
+        <div class="how-to-wrap">
+          <figure class="how-to-video">
+            <video controls preload="metadata" playsinline poster="/how-to-setup-poster.jpg" aria-label="Video: how to set up TikTok Saver">
+              <source src="/how-to-setup.mp4" type="video/mp4" />
+              Your browser cannot play this video.
+            </video>
+            <figcaption>
+              <b>▶ Watch: how to set up</b> (about 1 minute)
+              <span class="km" lang="km">មើល៖ របៀបរៀបចំ (ប្រហែល ១ នាទី)</span>
+            </figcaption>
+          </figure>
+        </div>
+
+        <ol class="mt-6 space-y-4">
+          <li class="flex gap-4">
+            <span class="step-chip">1</span>
+            <p class="pt-1">
+              Download the app with the button below. Then <b>unzip</b> it (right-click the file, then <b>Extract All</b>).
+              <span class="km text-muted" lang="km">ទាញយកកម្មវិធីដោយប៊ូតុងខាងក្រោម។ បន្ទាប់មក <b>ពន្លាវា</b> (ចុចខាងស្តាំលើឯកសារ រួចជ្រើស <b>Extract All</b>)។</span>
+            </p>
+          </li>
+          <li class="flex gap-4">
+            <span class="step-chip">2</span>
+            <p class="pt-1">
+              Install <b>Node.js</b> (free), one time only. Choose the "LTS" version.
+              <span class="km text-muted" lang="km">ដំឡើង <b>Node.js</b> (ឥតគិតថ្លៃ) តែម្តងប៉ុណ្ណោះ។ ជ្រើសកំណែ "LTS"។</span>
+            </p>
+          </li>
+          <li class="flex gap-4">
+            <span class="step-chip">3</span>
+            <p class="pt-1">
+              Open the unzipped folder and double-click <b>setup.bat</b> (one time only). It asks first. Then it downloads 2 free helper programs (about 215 MB) and puts a <b>TikTok Saver icon on your Desktop</b>.
+              <span class="km text-muted" lang="km">បើកថតដែលបានពន្លា ហើយចុចពីរដងលើ <b>setup.bat</b> (តែម្តងប៉ុណ្ណោះ)។ វាសួរជាមុន។ បន្ទាប់មកវាទាញយកកម្មវិធីជំនួយឥតគិតថ្លៃ 2 (ប្រហែល 215 MB) ហើយដាក់ <b>រូបតំណាង TikTok Saver លើ Desktop</b> របស់អ្នក។</span>
+            </p>
+          </li>
+          <li class="flex gap-4">
+            <span class="step-chip">4</span>
+            <p class="pt-1">
+              Double-click the <b>TikTok Saver</b> icon that setup put on your <b>Desktop</b> (or <b>start.bat</b>). Your browser opens your own page. Paste a link and press download.
+              <span class="km text-muted" lang="km">ចុចពីរដងលើរូបតំណាង <b>TikTok Saver</b> ដែល setup បានដាក់លើ <b>Desktop</b> របស់អ្នក (ឬ <b>start.bat</b>)។ browser របស់អ្នកបើកទំព័រផ្ទាល់ខ្លួន។ បិទភ្ជាប់តំណ ហើយចុចទាញយក។</span>
+            </p>
+          </li>
+        </ol>
+        <div class="mt-7 flex flex-wrap gap-3">
+          <a
+            href="https://github.com/lala80026051-cell/tiktok-saver/archive/refs/heads/main.zip"
+            class="btn-main inline-block rounded-full px-7 py-3 font-semibold"
+          >
+            ⬇️ Download the app <span lang="km" class="font-khmer font-normal opacity-85">ទាញយកកម្មវិធី</span>
+          </a>
+          <a href="https://nodejs.org" class="btn-alt inline-block rounded-full px-7 py-3 font-semibold">
+            Get Node.js <span lang="km" class="font-khmer font-normal opacity-75">ទទួល Node.js</span>
+          </a>
+        </div>
+        <p class="mt-4 text-sm text-muted">
+          Works on Windows for now. Already installed? Then <a class="font-semibold text-brand underline" href="http://localhost:4323/">open your own page</a> (it works after you double-click start.bat).
+          <span class="km" lang="km">ដំណើរការលើ Windows សម្រាប់ពេលនេះ។ ដំឡើងរួចហើយ? <a class="font-semibold text-brand underline" href="http://localhost:4323/">បើកទំព័រផ្ទាល់ខ្លួនរបស់អ្នក</a> (វាដំណើរការបន្ទាប់ពីអ្នកចុចពីរដងលើ start.bat)។</span>
+        </p>
+        <p class="mt-3 text-sm text-muted">
+          🙏 Only save your own videos, or videos where the owner says OK.
+          <span class="km" lang="km">រក្សាទុកតែវីដេអូរបស់អ្នកផ្ទាល់ ឬវីដេអូដែលម្ចាស់អនុញ្ញាត។</span>
+        </p>
+      </section>
+

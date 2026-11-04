@@ -4,6 +4,7 @@
 import Base from '../layouts/Base.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import StartHere from '../components/StartHere.astro';
 
 // The three steps shown under the headline.
 const steps = [
@@ -46,54 +47,6 @@ const perks = [
 ---
 
 <Base>
-  <!-- The ornaments, drawn once here and used many times with <use>. -->
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-    <defs>
-      <linearGradient id="gold-grad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#fff1b8" />
-        <stop offset="0.5" stop-color="#f0c35a" />
-        <stop offset="1" stop-color="#b9822a" />
-      </linearGradient>
-      <linearGradient id="fade-l" x1="0" x2="1" y1="0" y2="0">
-        <stop offset="0" stop-color="#e0a93b" stop-opacity="0" />
-        <stop offset="1" stop-color="#e0a93b" />
-      </linearGradient>
-      <linearGradient id="fade-r" x1="0" x2="1" y1="0" y2="0">
-        <stop offset="0" stop-color="#e0a93b" />
-        <stop offset="1" stop-color="#e0a93b" stop-opacity="0" />
-      </linearGradient>
-
-      <!-- A flame-like emblem: a pointed teardrop with a smaller one inside, and two side curls. -->
-      <symbol id="k-flame" viewBox="0 0 120 150">
-        <path d="M24 98 C6 94 -2 72 8 50 C11 66 19 75 31 79 Z" fill="url(#gold-grad)" />
-        <path d="M96 98 C114 94 122 72 112 50 C109 66 101 75 89 79 Z" fill="url(#gold-grad)" />
-        <path d="M60 6 C74 36 96 54 96 88 C96 118 80 142 60 142 C40 142 24 118 24 88 C24 54 46 36 60 6 Z" fill="url(#gold-grad)" />
-        <path d="M60 30 C70 52 84 64 84 88 C84 108 74 124 60 124 C46 124 36 108 36 88 C36 64 50 52 60 30 Z" fill="#3a0b12" />
-        <path d="M60 54 C66 68 74 76 74 90 C74 102 68 112 60 112 C52 112 46 102 46 90 C46 76 54 68 60 54 Z" fill="url(#gold-grad)" />
-        <circle cx="60" cy="92" r="5" fill="#3a0b12" />
-      </symbol>
-
-      <!-- A line with a gold diamond in the middle. -->
-      <symbol id="k-divider" viewBox="0 0 320 24">
-        <rect x="0" y="11" width="132" height="2" fill="url(#fade-l)" />
-        <rect x="188" y="11" width="132" height="2" fill="url(#fade-r)" />
-        <path d="M160 1 L173 12 L160 23 L147 12 Z" fill="url(#gold-grad)" />
-        <path d="M160 7 L167 12 L160 17 L153 12 Z" fill="#3a0b12" />
-        <path d="M138 7 L143 12 L138 17 L133 12 Z" fill="#e0a93b" />
-        <path d="M182 7 L187 12 L182 17 L177 12 Z" fill="#e0a93b" />
-      </symbol>
-
-      <!-- A corner for the gold frame: two lines and a small flame. -->
-      <symbol id="k-corner" viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 76 V26 Q4 4 26 4 H76" stroke-width="2.4" />
-        <path d="M13 76 V30 Q13 13 30 13 H76" stroke-width="1.2" opacity="0.7" />
-        <path d="M22 22 C30 14 42 18 40 28 C36 24 30 26 28 32 C26 28 24 25 22 22 Z" fill="currentColor" stroke="none" />
-        <circle cx="4" cy="76" r="2.6" fill="currentColor" stroke="none" />
-        <circle cx="76" cy="4" r="2.6" fill="currentColor" stroke="none" />
-      </symbol>
-    </defs>
-  </svg>
-
   <Header />
 
   <main>
@@ -143,6 +96,11 @@ const perks = [
       <div class="gold-strip absolute inset-x-0 bottom-0"></div>
     </section>
 
+    <!-- The empty sides of the cards get a Khmer pattern. The ornament columns are switched on only on
+         the public page (where there is no side panel), by the script at the bottom. -->
+    <div id="sides" class="khmer-sides">
+    <div class="khmer-pillar khmer-pillar-left" aria-hidden="true"></div>
+
     <!-- THE CARD -->
     <section class="relative mx-auto -mt-16 max-w-3xl px-4 pb-14 sm:px-6 xl:grid xl:max-w-none xl:grid-cols-[1fr_48rem_1fr] xl:items-start xl:gap-8">
       <!-- LEFT SIDE PANEL: the four site buttons. It shows only on wide screens (there is room on the left). -->
@@ -179,70 +137,7 @@ const perks = [
       </aside>
 
       <div class="min-w-0">
-      <!-- Shown only on the public website, where downloading cannot work. -->
-      <section id="public-guide" class="card-khmer hidden p-7 sm:p-10">
-        <svg class="corner corner-tl" aria-hidden="true"><use href="#k-corner"></use></svg>
-        <svg class="corner corner-tr" aria-hidden="true"><use href="#k-corner"></use></svg>
-        <svg class="corner corner-bl" aria-hidden="true"><use href="#k-corner"></use></svg>
-        <svg class="corner corner-br" aria-hidden="true"><use href="#k-corner"></use></svg>
-        <h2 class="font-display text-3xl font-extrabold text-brand-dark">
-          Start here
-          <span class="km font-moul text-base" lang="km">ចាប់ផ្តើមនៅទីនេះ</span>
-        </h2>
-        <p class="mt-3 text-muted">
-          This public page cannot download videos. But everyone can get the app and run it on their own Windows computer. It is free.
-          <span class="km" lang="km">ទំព័រសាធារណៈនេះមិនអាចទាញយកវីដេអូបានទេ។ ប៉ុន្តែអ្នកគ្រប់គ្នាអាចទទួលកម្មវិធី ហើយរត់វាលើកុំព្យូទ័រ Windows របស់ខ្លួន។ វាឥតគិតថ្លៃ។</span>
-        </p>
-        <ol class="mt-6 space-y-4">
-          <li class="flex gap-4">
-            <span class="step-chip">1</span>
-            <p class="pt-1">
-              Download the app with the button below. Then <b>unzip</b> it (right-click the file, then <b>Extract All</b>).
-              <span class="km text-muted" lang="km">ទាញយកកម្មវិធីដោយប៊ូតុងខាងក្រោម។ បន្ទាប់មក <b>ពន្លាវា</b> (ចុចខាងស្តាំលើឯកសារ រួចជ្រើស <b>Extract All</b>)។</span>
-            </p>
-          </li>
-          <li class="flex gap-4">
-            <span class="step-chip">2</span>
-            <p class="pt-1">
-              Install <b>Node.js</b> (free), one time only. Choose the "LTS" version.
-              <span class="km text-muted" lang="km">ដំឡើង <b>Node.js</b> (ឥតគិតថ្លៃ) តែម្តងប៉ុណ្ណោះ។ ជ្រើសកំណែ "LTS"។</span>
-            </p>
-          </li>
-          <li class="flex gap-4">
-            <span class="step-chip">3</span>
-            <p class="pt-1">
-              Open the unzipped folder and double-click <b>setup.bat</b> (one time only). It asks first, and then it downloads 2 free helper programs (about 215 MB).
-              <span class="km text-muted" lang="km">បើកថតដែលបានពន្លា ហើយចុចពីរដងលើ <b>setup.bat</b> (តែម្តងប៉ុណ្ណោះ)។ វាសួរជាមុន ហើយបន្ទាប់មកទាញយកកម្មវិធីជំនួយឥតគិតថ្លៃ 2 (ប្រហែល 215 MB)។</span>
-            </p>
-          </li>
-          <li class="flex gap-4">
-            <span class="step-chip">4</span>
-            <p class="pt-1">
-              Double-click <b>start.bat</b>. Your browser opens your own page. Paste a link and press download.
-              <span class="km text-muted" lang="km">ចុចពីរដងលើ <b>start.bat</b>។ browser របស់អ្នកបើកទំព័រផ្ទាល់ខ្លួន។ បិទភ្ជាប់តំណ ហើយចុចទាញយក។</span>
-            </p>
-          </li>
-        </ol>
-        <div class="mt-7 flex flex-wrap gap-3">
-          <a
-            href="https://github.com/lala80026051-cell/tiktok-saver/archive/refs/heads/main.zip"
-            class="btn-main inline-block rounded-full px-7 py-3 font-semibold"
-          >
-            ⬇️ Download the app <span lang="km" class="font-khmer font-normal opacity-85">ទាញយកកម្មវិធី</span>
-          </a>
-          <a href="https://nodejs.org" class="btn-alt inline-block rounded-full px-7 py-3 font-semibold">
-            Get Node.js <span lang="km" class="font-khmer font-normal opacity-75">ទទួល Node.js</span>
-          </a>
-        </div>
-        <p class="mt-4 text-sm text-muted">
-          Works on Windows for now. Already installed? Then <a class="font-semibold text-brand underline" href="http://localhost:4323/">open your own page</a> (it works after you double-click start.bat).
-          <span class="km" lang="km">ដំណើរការលើ Windows សម្រាប់ពេលនេះ។ ដំឡើងរួចហើយ? <a class="font-semibold text-brand underline" href="http://localhost:4323/">បើកទំព័រផ្ទាល់ខ្លួនរបស់អ្នក</a> (វាដំណើរការបន្ទាប់ពីអ្នកចុចពីរដងលើ start.bat)។</span>
-        </p>
-        <p class="mt-3 text-sm text-muted">
-          🙏 Only save your own videos, or videos where the owner says OK.
-          <span class="km" lang="km">រក្សាទុកតែវីដេអូរបស់អ្នកផ្ទាល់ ឬវីដេអូដែលម្ចាស់អនុញ្ញាត។</span>
-        </p>
-      </section>
+      <StartHere id="public-guide" class="hidden" />
 
       <p id="banner" role="status" class="mb-4 hidden rounded-2xl border-2 border-gold bg-ivory p-4 shadow-lg"></p>
 
@@ -466,6 +361,7 @@ const perks = [
         }
       </div>
     </section>
+    </div>
   </main>
 
   <Footer />
@@ -937,9 +833,13 @@ const perks = [
         if (!busy) checkHelper();
       }, 4000);
     } else {
-      // The public website: no download box, just the "Start here" steps.
+      // The public website: no download box, just the "Start here" steps. The site buttons on the
+      // left have nothing to do here, so they go away and the guide is centered.
       document.querySelector('#public-guide')!.classList.remove('hidden');
       form.classList.add('hidden');
+      document.querySelector('aside')?.remove();
+      document.querySelector('#sides')?.classList.add('khmer-pillars');
+      form.closest('section')?.classList.remove('xl:grid', 'xl:max-w-none');
     }
   }
   startUp();

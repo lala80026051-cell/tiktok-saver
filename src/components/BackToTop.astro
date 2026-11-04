@@ -1,0 +1,47 @@
+---
+// A round gold button, fixed at the bottom-right of every page.
+//  - On the home page: it appears after you scroll down, and it takes you back to the top.
+//  - On any other page: it is always shown, and it takes you to the home page ("/").
+---
+
+<a
+  id="first-page"
+  href="/"
+  aria-label="Go to the first page"
+  class="fixed right-4 bottom-4 z-30 hidden items-center gap-2 rounded-full border-2 border-gold bg-maroon px-4 py-3 font-semibold text-gold-light shadow-xl shadow-maroon-deep/40 transition hover:-translate-y-1 hover:bg-brand-dark sm:right-6 sm:bottom-6"
+>
+  <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 19V5M5 12l7-7 7 7" />
+  </svg>
+  <span class="hidden sm:inline">
+    First page
+    <span lang="km" class="font-khmer font-normal opacity-80">ទំព័រដើម</span>
+  </span>
+</a>
+
+<script>
+  const button = document.querySelector<HTMLAnchorElement>('#first-page');
+  if (button) {
+    const onHome = location.pathname === '/' || location.pathname === '/index.html';
+
+    // Show the button: always on other pages, and after a little scrolling on the home page.
+    const update = () => {
+      const show = !onHome || window.scrollY > 300;
+      button.classList.toggle('hidden', !show);
+      button.classList.toggle('inline-flex', show);
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+
+    // On the home page, scroll up smoothly (or at once, if the person turned off motion).
+    // This works for the round button and for the "First page" button in the top bar.
+    for (const link of document.querySelectorAll<HTMLAnchorElement>('#first-page, [data-first-page]')) {
+      link.addEventListener('click', (event) => {
+        if (!onHome) return; // another page: the link goes to "/"
+        event.preventDefault();
+        const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        window.scrollTo({ top: 0, behavior: still ? 'auto' : 'smooth' });
+      });
+    }
+  }
+</script>

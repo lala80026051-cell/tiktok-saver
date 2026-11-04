@@ -1,0 +1,12 @@
+{
+  "_note": "The text of the how-to video. Each scene: how many seconds it lasts, the English text, and the Khmer text. \\N means a new line. Please ask a Khmer speaker to check the Khmer.",
+  "scenes": [
+    { "seconds": 4,  "title": true, "en": "How to set up\\NTikTok Saver", "km": "របៀបរៀបចំ\\NTikTok Saver" },
+    { "seconds": 11, "en": "1. Press “Download the app”.\\NThen unzip the file:\\Nright-click, Extract All.", "km": "១. ចុច “Download the app”។\\Nបន្ទាប់មកពន្លាឯកសារ៖\\Nចុចខាងស្តាំ រួចចុច Extract All។" },
+    { "seconds": 9,  "en": "2. Install Node.js (free).\\NChoose the LTS version.\\NDo this only once.", "km": "២. ដំឡើង Node.js (ឥតគិតថ្លៃ)។\\Nជ្រើសកំណែ LTS។\\Nធ្វើតែម្តងប៉ុណ្ណោះ។" },
+    { "seconds": 13, "en": "3. Open the folder.\\NDouble-click setup.bat.\\NType Y, press Enter.", "km": "៣. បើកថត។\\Nចុចពីរដងលើ setup.bat។\\Nវាយ Y ហើយចុច Enter។" },
+    { "seconds": 10, "en": "4. Double-click the\\NTikTok Saver icon\\Non your Desktop.", "km": "៤. ចុចពីរដងលើរូបតំណាង\\NTikTok Saver\\Nលើ Desktop របស់អ្នក។" },
+    { "seconds": 12, "en": "5. Choose the site.\\NPaste the link.\\NPress Download.", "km": "៥. ជ្រើសរើសវេទិកា។\\Nបិទភ្ជាប់តំណ។\\Nចុច Download។" },
+    { "seconds": 6,  "title": true, "en": "Only save your own videos,\\Nor videos where the\\Nowner says OK.", "km": "រក្សាទុកតែវីដេអូរបស់អ្នកផ្ទាល់\\Nឬវីដេអូដែលម្ចាស់អនុញ្ញាត។" }
+  ]
+}

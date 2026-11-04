@@ -2,6 +2,8 @@
 // The outer frame shared by every page: <head>, fonts, and global styles.
 import '../styles/global.css';
 import { site } from '../site';
+import BackToTop from '../components/BackToTop.astro';
+import Ornaments from '../components/Ornaments.astro';
 
 interface Props {
   title?: string;
@@ -25,6 +27,8 @@ const fullTitle = title ? `${title} · ${site.name}` : site.name;
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   </head>
   <body class="min-h-screen">
+    <Ornaments />
     <slot />
+    <BackToTop />
   </body>
 </html>

@@ -208,6 +208,78 @@ html {
   /* Cards that lift a little when you point at them. */
   .lift { transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
   .lift:hover { transform: translateY(-4px); box-shadow: 0 18px 34px -18px rgb(37 7 12 / 0.5); border-color: #a8741f; }
+
+  /* ---- The empty spaces on the left and right of the cards ---- */
+
+  /* A full-width area under the top band. A soft gold lattice fills the two sides, and it fades
+     away towards the middle, so the card in the middle stays clean. */
+  .khmer-sides {
+    position: relative;
+    display: flow-root; /* keeps the card's overlap with the top band as it is */
+    isolation: isolate;
+  }
+  .khmer-sides::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: url("/khmer-pattern-light.svg") top center / 72px 72px;
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 16%, transparent 38%, transparent 62%, #000 84%, #000 100%);
+    mask-image: linear-gradient(90deg, #000 0, #000 16%, transparent 38%, transparent 62%, #000 84%, #000 100%);
+    pointer-events: none;
+  }
+
+  /* Tall ornament columns, one on each side of the card. They are only shown on wide screens,
+     where there is room, and only inside an area that has the class "khmer-pillars". */
+  .khmer-pillar {
+    display: none;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 160px;
+    background: url("/khmer-column.svg") center top / 160px 320px repeat-y;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 5%, #000 95%, transparent 100%);
+    mask-image: linear-gradient(180deg, transparent 0, #000 5%, #000 95%, transparent 100%);
+    pointer-events: none;
+  }
+  .khmer-pillar-left { left: calc(50% - 24rem - 48px - 160px); }   /* 24rem = half of the 48rem card */
+  .khmer-pillar-right { left: calc(50% + 24rem + 48px); }
+  @media (min-width: 1250px) {
+    .khmer-pillars > .khmer-pillar { display: block; }
+  }
+
+  /* ---- The how-to video on the Start here page ---- */
+  .how-to-wrap { margin-top: 1.5rem; }
+  .how-to-video {
+    margin: 0 auto;
+    max-width: 20rem;
+    padding: 0.6rem;
+    border: 2px solid #c8922f;
+    border-radius: 1rem;
+    background: #fff8e8;
+    box-shadow: 0 18px 34px -20px rgb(37 7 12 / 0.6);
+  }
+  .how-to-video video {
+    display: block;
+    width: 100%;
+    aspect-ratio: 9 / 16;
+    border-radius: 0.7rem;
+    background: #25070c;
+  }
+  .how-to-video figcaption { margin-top: 0.6rem; text-align: center; font-size: 0.85rem; color: var(--color-muted); }
+  .how-to-video figcaption b { color: var(--color-brand-dark); }
+  /* Wide screens: the video leaves the card and sits in the free space on its right. */
+  @media (min-width: 1300px) {
+    .how-to-wrap {
+      position: absolute; /* the card is the reference: it is "position: relative" */
+      top: 0;
+      bottom: 0;
+      left: calc(100% + 40px);
+      width: min(16rem, calc(50vw - 24rem - 56px));
+      margin-top: 0;
+    }
+    .how-to-video { position: sticky; top: 6rem; max-width: none; }
+  }
 }
 
 /*

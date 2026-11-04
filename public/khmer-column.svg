@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="320" viewBox="0 0 160 320">
+  <!-- One piece of a tall Khmer-style ornament column. It repeats downwards. All shapes are original. -->
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f0c35a" />
+      <stop offset="0.5" stop-color="#d9a441" />
+      <stop offset="1" stop-color="#a8741f" />
+    </linearGradient>
+  </defs>
+
+  <!-- Two thin gold lines down the edges, with a small diamond bead every 80 pixels. -->
+  <g stroke="#c8922f" stroke-width="2" opacity="0.8">
+    <line x1="10" y1="0" x2="10" y2="320" />
+    <line x1="150" y1="0" x2="150" y2="320" />
+  </g>
+  <g fill="#c8922f" opacity="0.9">
+    <path d="M10 35 l6 6 -6 6 -6 -6 z" />
+    <path d="M150 35 l6 6 -6 6 -6 -6 z" />
+    <path d="M10 115 l6 6 -6 6 -6 -6 z" />
+    <path d="M150 115 l6 6 -6 6 -6 -6 z" />
+    <path d="M10 195 l6 6 -6 6 -6 -6 z" />
+    <path d="M150 195 l6 6 -6 6 -6 -6 z" />
+    <path d="M10 275 l6 6 -6 6 -6 -6 z" />
+    <path d="M150 275 l6 6 -6 6 -6 -6 z" />
+  </g>
+
+  <!-- The flame emblem (the same shapes as the logo). -->
+  <g transform="translate(43 18) scale(0.62)">
+    <path d="M24 98 C6 94 -2 72 8 50 C11 66 19 75 31 79 Z" fill="url(#gold)" />
+    <path d="M96 98 C114 94 122 72 112 50 C109 66 101 75 89 79 Z" fill="url(#gold)" />
+    <path d="M60 6 C74 36 96 54 96 88 C96 118 80 142 60 142 C40 142 24 118 24 88 C24 54 46 36 60 6 Z" fill="url(#gold)" />
+    <path d="M60 30 C70 52 84 64 84 88 C84 108 74 124 60 124 C46 124 36 108 36 88 C36 64 50 52 60 30 Z" fill="#5a1220" />
+    <path d="M60 54 C66 68 74 76 74 90 C74 102 68 112 60 112 C52 112 46 102 46 90 C46 76 54 68 60 54 Z" fill="url(#gold)" />
+    <circle cx="60" cy="92" r="5" fill="#5a1220" />
+  </g>
+
+  <!-- Nested diamonds with a dot in the middle. -->
+  <g fill="none" stroke="url(#gold)" stroke-width="3">
+    <path d="M80 148 L122 190 L80 232 L38 190 Z" />
+    <path d="M80 164 L106 190 L80 216 L54 190 Z" />
+    <path d="M80 178 L92 190 L80 202 L68 190 Z" />
+  </g>
+  <circle cx="80" cy="190" r="3.5" fill="#c8922f" />
+
+  <!-- A short chain of beads before the next piece starts. -->
+  <g fill="#c8922f" opacity="0.9">
+    <circle cx="80" cy="256" r="4" />
+    <circle cx="80" cy="276" r="3" />
+    <circle cx="80" cy="294" r="2.2" />
+  </g>
+</svg>

@@ -2,6 +2,8 @@ node_modules/
 dist/
 # The helper programs that setup.bat downloads (yt-dlp, ffmpeg). They are not part of the project.
 tools/
+# The pictures and pieces made while making the how-to video (the finished video is in public/).
+video/build/
 .astro/
 .wrangler/
 .dev.vars

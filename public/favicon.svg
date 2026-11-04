@@ -1,1 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6dd91"/><stop offset="1" stop-color="#c8922f"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="#3a0b12"/><path d="M32 8 L56 32 L32 56 L8 32 Z" fill="none" stroke="url(#g)" stroke-width="3"/><path d="M32 18 C36 26 42 30 42 37 C42 43 37 47 32 47 C27 47 22 43 22 37 C22 30 28 26 32 18 Z" fill="url(#g)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- The TikTok Saver logo: the gold flame emblem on a dark red rounded square. -->
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff1b8" />
+      <stop offset="0.5" stop-color="#f0c35a" />
+      <stop offset="1" stop-color="#b9822a" />
+    </linearGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7a1828" />
+      <stop offset="1" stop-color="#25070c" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)" />
+  <g transform="translate(10.8 5.9) scale(0.353)">
+    <path d="M24 98 C6 94 -2 72 8 50 C11 66 19 75 31 79 Z" fill="url(#g)" />
+    <path d="M96 98 C114 94 122 72 112 50 C109 66 101 75 89 79 Z" fill="url(#g)" />
+    <path d="M60 6 C74 36 96 54 96 88 C96 118 80 142 60 142 C40 142 24 118 24 88 C24 54 46 36 60 6 Z" fill="url(#g)" />
+    <path d="M60 30 C70 52 84 64 84 88 C84 108 74 124 60 124 C46 124 36 108 36 88 C36 64 50 52 60 30 Z" fill="#3a0b12" />
+    <path d="M60 54 C66 68 74 76 74 90 C74 102 68 112 60 112 C52 112 46 102 46 90 C46 76 54 68 60 54 Z" fill="url(#g)" />
+    <circle cx="60" cy="92" r="5" fill="#3a0b12" />
+  </g>
+</svg>

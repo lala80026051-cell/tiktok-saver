@@ -1,0 +1,53 @@
+---
+// The Khmer ornaments, drawn once here as small original SVG shapes and used many times with <use>.
+// They are placed in the shared page frame (Base.astro), so every page can use them.
+---
+
+<!-- The ornaments, drawn once here and used many times with <use>. -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="gold-grad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#fff1b8" />
+        <stop offset="0.5" stop-color="#f0c35a" />
+        <stop offset="1" stop-color="#b9822a" />
+      </linearGradient>
+      <linearGradient id="fade-l" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0" stop-color="#e0a93b" stop-opacity="0" />
+        <stop offset="1" stop-color="#e0a93b" />
+      </linearGradient>
+      <linearGradient id="fade-r" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0" stop-color="#e0a93b" />
+        <stop offset="1" stop-color="#e0a93b" stop-opacity="0" />
+      </linearGradient>
+
+      <!-- A flame-like emblem: a pointed teardrop with a smaller one inside, and two side curls. -->
+      <symbol id="k-flame" viewBox="0 0 120 150">
+        <path d="M24 98 C6 94 -2 72 8 50 C11 66 19 75 31 79 Z" fill="url(#gold-grad)" />
+        <path d="M96 98 C114 94 122 72 112 50 C109 66 101 75 89 79 Z" fill="url(#gold-grad)" />
+        <path d="M60 6 C74 36 96 54 96 88 C96 118 80 142 60 142 C40 142 24 118 24 88 C24 54 46 36 60 6 Z" fill="url(#gold-grad)" />
+        <path d="M60 30 C70 52 84 64 84 88 C84 108 74 124 60 124 C46 124 36 108 36 88 C36 64 50 52 60 30 Z" fill="#3a0b12" />
+        <path d="M60 54 C66 68 74 76 74 90 C74 102 68 112 60 112 C52 112 46 102 46 90 C46 76 54 68 60 54 Z" fill="url(#gold-grad)" />
+        <circle cx="60" cy="92" r="5" fill="#3a0b12" />
+      </symbol>
+
+      <!-- A line with a gold diamond in the middle. -->
+      <symbol id="k-divider" viewBox="0 0 320 24">
+        <rect x="0" y="11" width="132" height="2" fill="url(#fade-l)" />
+        <rect x="188" y="11" width="132" height="2" fill="url(#fade-r)" />
+        <path d="M160 1 L173 12 L160 23 L147 12 Z" fill="url(#gold-grad)" />
+        <path d="M160 7 L167 12 L160 17 L153 12 Z" fill="#3a0b12" />
+        <path d="M138 7 L143 12 L138 17 L133 12 Z" fill="#e0a93b" />
+        <path d="M182 7 L187 12 L182 17 L177 12 Z" fill="#e0a93b" />
+      </symbol>
+
+      <!-- A corner for the gold frame: two lines and a small flame. -->
+      <symbol id="k-corner" viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 76 V26 Q4 4 26 4 H76" stroke-width="2.4" />
+        <path d="M13 76 V30 Q13 13 30 13 H76" stroke-width="1.2" opacity="0.7" />
+        <path d="M22 22 C30 14 42 18 40 28 C36 24 30 26 28 32 C26 28 24 25 22 22 Z" fill="currentColor" stroke="none" />
+        <circle cx="4" cy="76" r="2.6" fill="currentColor" stroke="none" />
+        <circle cx="76" cy="4" r="2.6" fill="currentColor" stroke="none" />
+      </symbol>
+    </defs>
+  </svg>
+

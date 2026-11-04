@@ -8,6 +8,31 @@ import { site } from '../site';
       <img src="/favicon.svg" alt="" class="size-8" />
       {site.name}
     </a>
-    <span lang="km" class="hidden text-sm text-gold-light/80 sm:inline">រក្សាទុកវីដេអូរបស់អ្នក</span>
+    <div class="flex items-center gap-2 sm:gap-3">
+      <span lang="km" class="mr-2 hidden text-sm text-gold-light/80 xl:inline">រក្សាទុកវីដេអូរបស់អ្នក</span>
+      <!-- Always visible: the Start here guide (how to get the app). -->
+      <a
+        href="/start"
+        class="inline-flex items-center gap-2 rounded-full border border-gold bg-gold/15 px-3 py-1.5 text-sm font-semibold text-gold-light transition hover:bg-gold/30"
+      >
+        <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 5a2 2 0 012-2h13v15H6a2 2 0 00-2 2V5zM4 20a2 2 0 002 2h13M9 8h6M9 12h6" />
+        </svg>
+        <span class="hidden sm:inline">Start here <span lang="km" class="font-khmer font-normal opacity-80">ចាប់ផ្តើមនៅទីនេះ</span></span>
+        <span class="sm:hidden">Start</span>
+      </a>
+      <!-- Always visible: goes to the first page (on the home page it scrolls up to the top). -->
+      <a
+        href="/"
+        data-first-page
+        aria-label="First page"
+        class="inline-flex items-center gap-2 rounded-full border border-gold/70 px-3 py-1.5 text-sm font-semibold text-gold-light transition hover:bg-gold/20"
+      >
+        <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10" />
+        </svg>
+        <span class="hidden lg:inline">First page <span lang="km" class="font-khmer font-normal opacity-80">ទំព័រដើម</span></span>
+      </a>
+    </div>
   </div>
 </header>
